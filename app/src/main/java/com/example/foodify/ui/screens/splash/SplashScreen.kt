@@ -29,7 +29,7 @@ fun SplashScreen(navController: NavController) {
 
             ) {
             Image(
-                painterResource(R.mipmap.app_icon),
+                painterResource(R.mipmap.app_logo),
                 contentDescription = "Logo",
                 modifier = Modifier.size(120.dp)
             )
