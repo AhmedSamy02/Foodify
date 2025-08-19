@@ -59,8 +59,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    // Splash Screen
-    implementation(libs.core.splashscreen)
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.2")
     //Navigation
@@ -76,5 +74,6 @@ dependencies {
     // Dagger Hilt
     implementation("com.google.dagger:hilt-android:2.57")
     ksp("com.google.dagger:hilt-android-compiler:2.57")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
 }

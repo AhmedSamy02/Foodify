@@ -18,17 +18,20 @@ import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.foodify.ui.navigation.Screen
 import com.example.foodify.ui.theme.LoadingCircle
+import com.example.foodify.viewmodels.SplashViewModel
 import kotlinx.coroutines.delay
 
 
 @Composable
-fun CirclesLoader(modifier: Modifier, circleSize: Dp,navController: NavController) {
+fun CirclesLoader(modifier: Modifier, circleSize: Dp, navController: NavController) {
     var startFill1 by remember { mutableStateOf(false) }
     var startFill2 by remember { mutableStateOf(false) }
     var startFill3 by remember { mutableStateOf(false) }
+    val viewModel = hiltViewModel<SplashViewModel>()
     LaunchedEffect(Unit) {
         delay(500)
         startFill1 = true
@@ -37,9 +40,17 @@ fun CirclesLoader(modifier: Modifier, circleSize: Dp,navController: NavControlle
         delay(800)
         startFill3 = true
         delay(1000)
-        navController.navigate(Screen.OnBoarding.route){
-            navController.popBackStack()
+        val res = viewModel.checkFirstTime()
+        if (res) {
+            navController.navigate(Screen.OnBoarding.route) {
+                navController.popBackStack()
+            }
+        } else {
+            navController.navigate(Screen.Home.route) {
+                navController.popBackStack()
+            }
         }
+
     }
     val c1 by animateFloatAsState(
         targetValue = if (startFill1) 1f else 0f,
