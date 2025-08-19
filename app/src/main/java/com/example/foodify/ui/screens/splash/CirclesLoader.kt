@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.foodify.ui.navigation.Screen
-import com.example.foodify.ui.theme.LoadingCircle
+import com.example.foodify.ui.theme.LoadingCircleColor
 import com.example.foodify.viewmodels.SplashViewModel
 import kotlinx.coroutines.delay
 
@@ -69,9 +69,9 @@ fun CirclesLoader(modifier: Modifier, circleSize: Dp, navController: NavControll
 
     Row(modifier, horizontalArrangement = Arrangement.Center) {
         Canvas(Modifier.size(circleSize)) {
-            drawCircle(color = LoadingCircle, style = Stroke(width = 2.0f))
+            drawCircle(color = LoadingCircleColor, style = Stroke(width = 2.0f))
             drawCircle(
-                color = LoadingCircle,
+                color = LoadingCircleColor,
                 style = Fill,
                 alpha = c1
             )
@@ -81,9 +81,9 @@ fun CirclesLoader(modifier: Modifier, circleSize: Dp, navController: NavControll
                 .padding(horizontal = 16.dp)
                 .size(circleSize)
         ) {
-            drawCircle(color = LoadingCircle, style = Stroke(width = 2.0f))
+            drawCircle(color = LoadingCircleColor, style = Stroke(width = 2.0f))
             drawCircle(
-                color = LoadingCircle,
+                color = LoadingCircleColor,
                 style = Fill,
                 alpha = c2,
             )
@@ -92,9 +92,9 @@ fun CirclesLoader(modifier: Modifier, circleSize: Dp, navController: NavControll
             Modifier
                 .size(circleSize)
         ) {
-            drawCircle(color = LoadingCircle, style = Stroke(width = 2.0f))
+            drawCircle(color = LoadingCircleColor, style = Stroke(width = 2.0f))
             drawCircle(
-                color = LoadingCircle,
+                color = LoadingCircleColor,
                 style = Fill,
                 alpha = c3
             )
