@@ -2,10 +2,10 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
-
+    id("com.google.devtools.ksp")
 }
+
 
 android {
     namespace = "com.example.foodify"
@@ -77,4 +77,6 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     // Splash screen
     implementation(libs.core.splashscreen)
+    //Gson for type conversion list of Recipe inside Collection
+    implementation("com.google.code.gson:gson:2.10.1")
 }
