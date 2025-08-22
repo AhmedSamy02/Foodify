@@ -1,11 +1,12 @@
+// DatabaseModule.kt
 package com.example.foodify.di
 
 import android.content.Context
 import androidx.room.Room
 import com.example.foodify.dao.RecipeDao
+import com.example.foodify.datalocal.RecipeDatabase
 import com.example.foodify.data.repository.RecipeRepository
 import com.example.foodify.data.repository.RecipeRepositoryImpl
-import com.example.foodify.datalocal.RecipeDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,8 +15,21 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
-object AppModule {
+object DatabaseModule {
+
     @Provides
     @Singleton
-    fun provideRepository(dao: RecipeDao): RecipeRepository = RecipeRepositoryImpl(dao)
+    fun provideDatabase(@ApplicationContext context: Context): RecipeDatabase {
+        return Room.databaseBuilder(
+            context,
+            RecipeDatabase::class.java,
+            "recipe_db"
+        )
+            .fallbackToDestructiveMigration()
+            .build()
+    }
+
+    @Provides
+    fun provideRecipeDao(db: RecipeDatabase): RecipeDao = db.recipeDao()
 }
+

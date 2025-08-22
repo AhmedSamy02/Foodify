@@ -43,7 +43,8 @@ android {
 }
 
 dependencies {
-
+    implementation(platform("androidx.compose:compose-bom:2024.08.00"))
+    implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -52,6 +53,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -77,4 +79,6 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     // Splash screen
     implementation(libs.core.splashscreen)
+    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("com.google.accompanist:accompanist-flowlayout:0.32.0")
 }
