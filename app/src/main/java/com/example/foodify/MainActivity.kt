@@ -7,11 +7,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
-import com.example.foodify.data.models.Recipe
-import com.example.foodify.data.models.Collection
-import com.example.foodify.ui.navigation.NavigationStack
-import com.example.foodify.ui.theme.FoodifyTheme
-import com.example.foodify.viewmodels.LocalViewModel
+import com.example.foodify.data.local.Recipe
+import com.example.foodify.data.local.Collection
+import com.example.foodify.presentation.navigation.NavigationStack
+import com.example.foodify.presentation.theme.FoodifyTheme
+import com.example.foodify.presentation.viewmodels.LocalViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 

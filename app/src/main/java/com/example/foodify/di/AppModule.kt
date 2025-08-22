@@ -2,8 +2,13 @@ package com.example.foodify.di
 
 import android.content.Context
 import androidx.room.Room
-import com.example.foodify.database.FoodifyDatabase
-import dagger.Binds
+import com.example.foodify.data.database.CollectionDao
+import com.example.foodify.data.database.FoodifyDatabase
+import com.example.foodify.data.database.RecipeDao
+import com.example.foodify.data.repository.CollectionRepositoryImpl
+import com.example.foodify.data.repository.RecipeRepositoryImp
+import com.example.foodify.domain.repository.CollectionRepository
+import com.example.foodify.domain.repository.RecipeRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,6 +30,27 @@ object AppModule {
     }
     @Singleton
     @Provides
-    fun provideFoodifyDao(foodifyDatabase: FoodifyDatabase) = foodifyDatabase.dao
+    fun provideRecipeDao(foodifyDatabase: FoodifyDatabase): RecipeDao {
+        return foodifyDatabase.recipeDao()
+    }
+
+    @Singleton
+    @Provides
+    fun provideCollectionDao(foodifyDatabase: FoodifyDatabase) : CollectionDao {
+        return foodifyDatabase.collectionDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRecipeRepository(db: FoodifyDatabase): RecipeRepository {
+        return RecipeRepositoryImp(db.recipeDao())
+    }
+
+    @Provides
+    @Singleton
+    fun provideCollectionRepository(db: FoodifyDatabase): CollectionRepository {
+        return CollectionRepositoryImpl(db.collectionDao())
+    }
+
 
 }
