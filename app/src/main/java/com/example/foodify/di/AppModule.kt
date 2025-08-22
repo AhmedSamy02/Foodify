@@ -3,7 +3,6 @@ package com.example.foodify.di
 import android.content.Context
 import androidx.room.Room
 import com.example.foodify.database.FoodifyDatabase
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,10 +17,10 @@ object AppModule {
     @Provides
     fun provideFoodifyDatabase(@ApplicationContext context: Context): FoodifyDatabase {
         return Room.databaseBuilder(
-            context,
-            FoodifyDatabase::class.java,
-            "foodify_database"
-        ).build()
+                context,
+                FoodifyDatabase::class.java,
+                "foodify_database"
+            ).fallbackToDestructiveMigration(false).build()
     }
     @Singleton
     @Provides

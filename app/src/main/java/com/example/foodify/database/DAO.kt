@@ -7,6 +7,7 @@ import androidx.room.Upsert
 import com.example.foodify.data.models.Collection
 import com.example.foodify.data.models.CollectionRecipeCrossRef
 import com.example.foodify.data.models.Recipe
+import com.example.foodify.data.models.SavedRecipes
 
 @Dao
 interface DAO {
@@ -21,4 +22,10 @@ interface DAO {
     suspend fun getCollections(): List<Collection>
     @Query("SELECT * FROM recipe")
     suspend fun getRecipes(): List<Recipe>
+
+    @Insert
+    suspend fun insertSavedRecipes(recipes: List<SavedRecipes>)
+    @Query("SELECT * FROM savedrecipes")
+    suspend fun getSavedRecipes(): List<SavedRecipes>
+
 }
