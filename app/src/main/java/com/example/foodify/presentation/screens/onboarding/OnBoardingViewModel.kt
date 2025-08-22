@@ -1,4 +1,4 @@
-package com.example.foodify.presentation.viewmodels
+package com.example.foodify.presentation.screens.onboarding
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel

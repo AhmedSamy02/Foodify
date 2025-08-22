@@ -22,7 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.foodify.presentation.navigation.Screen
 import com.example.foodify.presentation.theme.LoadingCircleColor
-import com.example.foodify.presentation.viewmodels.SplashViewModel
+import com.example.foodify.presentation.screens.splash.SplashViewModel
 import kotlinx.coroutines.delay
 
 

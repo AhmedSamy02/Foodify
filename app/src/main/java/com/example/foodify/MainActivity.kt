@@ -18,18 +18,18 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     val viewModel by viewModels<LocalViewModel>()
-    val recipe = Recipe(
-        id = 1,
-        title = "Pizza",
-        ingredients = listOf("Pizza Ingredients", "Pizza Ingredients"),
-        steps = listOf("Pizza Instructions", "Pizza Instructions"),
-        tags = listOf("Pizza", "Italian"),
-    )
-    val collection = Collection(
-        id = 1,
-        title = "Pizza",
-        recipes = listOf(recipe,recipe)
-    )
+//    val recipe = Recipe(
+//        id = 1,
+//        title = "Pizza",
+//        ingredients = listOf("Pizza Ingredients", "Pizza Ingredients"),
+//        steps = listOf("Pizza Instructions", "Pizza Instructions"),
+//        tags = listOf("Pizza", "Italian"),
+//    )
+//    val collection = Collection(
+//        id = 1,
+//        title = "Pizza",
+//        recipes = listOf(recipe,recipe)
+//    )
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -40,19 +40,19 @@ class MainActivity : ComponentActivity() {
             }
         }
         lifecycleScope.launch {
-            testRecipeInsertionAndRetrieval(viewModel,recipe)
-            testCollectionInsertionAndRetrieval(viewModel,collection)
+//            testRecipeInsertionAndRetrieval(viewModel,recipe)
+//            testCollectionInsertionAndRetrieval(viewModel,collection)
         }
     }
     private suspend fun testRecipeInsertionAndRetrieval(viewModel: LocalViewModel,recipe: Recipe){
             viewModel.insertRecipe(recipe)
-            val recipes = viewModel.getRecipes()
-            println(recipes)
+//            val recipes = viewModel.getRecipes()
+//            println(recipes)
     }
-    private suspend fun testCollectionInsertionAndRetrieval(viewModel: LocalViewModel,collection: Collection){
-        viewModel.insertCollection(collection)
-        val collections = viewModel.getCollections()
-        println(collections)
-    }
+//    private suspend fun testCollectionInsertionAndRetrieval(viewModel: LocalViewModel,collection: Collection){
+//        viewModel.insertCollection(collection)
+//        val collections = viewModel.getCollections()
+//        println(collections)
+//    }
 }
 

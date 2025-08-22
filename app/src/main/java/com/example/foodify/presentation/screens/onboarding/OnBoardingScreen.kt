@@ -24,7 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.foodify.presentation.viewmodels.OnBoardingViewModel
+import com.example.foodify.presentation.screens.onboarding.OnBoardingViewModel
 
 @Composable
 fun OnBoardingScreen(navController: NavHostController) {

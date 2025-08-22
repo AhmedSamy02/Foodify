@@ -1,6 +1,5 @@
-package com.example.foodify.presentation.viewmodels
+package com.example.foodify.presentation.screens.splash
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.foodify.domain.repository.UserPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
