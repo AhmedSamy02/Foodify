@@ -113,20 +113,11 @@ class CollectionRepositoryImpl @Inject constructor(
             imageUrl = imageUrl,
             ingredients = ingredients,
             steps = steps,
-            tags = tags
+            tags = listOf()
         )
     }
 
-    private fun Recipe.toEntity(): RecipeEntity {
-        return RecipeEntity(
-            id = id,
-            title = title,
-            imageUrl = imageUrl,
-            ingredients = ingredients,
-            steps = steps,
-            tags = tags
-        )
-    }
+
 
 
 

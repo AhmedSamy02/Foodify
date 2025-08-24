@@ -2,6 +2,7 @@ package com.example.foodify.data.repository
 
 import com.example.foodify.data.local.RecipeEntity
 import com.example.foodify.data.database.RecipeDao
+import com.example.foodify.datalocal.Recipe
 import com.example.foodify.domain.repository.RecipeRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -13,12 +14,12 @@ class RecipeRepositoryImp @Inject constructor(
         recipeDao.insertRecipe(recipe)
     }
 
-    override fun searchRecipes(
-        query: String,
-        tags: List<String>
-    ): Flow<List<RecipeEntity>> {
-        return recipeDao.searchRecipes(query)
-    }
+//    override fun searchRecipes(
+//        query: String,
+//        tags: List<String>
+//    ): Flow<List<RecipeEntity>> {
+//        return recipeDao.searchRecipes(query)
+//    }
 
     override suspend fun getRecipeById(id: String): RecipeEntity? {
         return recipeDao.getRecipeById(id)
@@ -26,6 +27,14 @@ class RecipeRepositoryImp @Inject constructor(
 
     override suspend fun deleteRecipe(recipe: RecipeEntity) {
         recipeDao.deleteRecipe(recipe)
+    }
+    override fun searchRecipes(
+        title: String?,
+        difficulty: String?,
+        dishTypes: List<String>,
+        maxCookingTime: Int?
+    ): Flow<List<RecipeEntity>> {
+        return recipeDao.searchRecipes(title, difficulty, dishTypes, dishTypes.size, maxCookingTime)
     }
 //    private fun Recipe.toEntity(): Recipe{
 //        return Recipe(

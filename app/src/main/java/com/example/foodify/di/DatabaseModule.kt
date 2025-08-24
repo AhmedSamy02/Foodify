@@ -5,8 +5,6 @@ import android.content.Context
 import androidx.room.Room
 import com.example.foodify.dao.RecipeDao
 import com.example.foodify.datalocal.RecipeDatabase
-import com.example.foodify.data.repository.RecipeRepository
-import com.example.foodify.data.repository.RecipeRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

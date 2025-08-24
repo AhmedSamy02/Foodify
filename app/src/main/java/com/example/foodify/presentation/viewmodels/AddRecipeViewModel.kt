@@ -127,7 +127,9 @@ class AddRecipeViewModel @Inject constructor(private val useCase: AddRecipeUseCa
                                 imageUrl = state.imageURL,
                                 ingredients = state.ingredients.toList(),
                                 steps = state.steps.toList(),
-                                tags = state.dishType.toList()
+                                difficulty = state.difficulty,
+                                dishType = state.dishType[0],
+                                cookTime = state.cookTimeMinutes + state.cookTimeHours * 60,
                             )
                         )
                         res.fold(onSuccess = { u ->

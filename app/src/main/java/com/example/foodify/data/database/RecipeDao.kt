@@ -20,10 +20,22 @@ interface RecipeDao {
     @Query("SELECT * FROM recipes WHERE id = :id")
     suspend fun getRecipeById(id: String): RecipeEntity?
 
-    @Query("SELECT * FROM recipes WHERE title LIKE '%' || :query || '%' OR ingredients LIKE '%' || :query || '%' OR tags LIKE '%' || :query || '%'")
-    fun searchRecipes(query: String): Flow<List<RecipeEntity>>
+    @Query("""
+        SELECT * FROM recipes
+        WHERE (:title IS NULL OR title LIKE '%' || :title || '%')
+        AND (:difficulty IS NULL OR difficulty = :difficulty)
+        AND (:dishTypesCount = 0 OR dishType IN (:dishTypes))
+        AND (:maxCookingTime IS NULL OR cookTime <= :maxCookingTime)
+    """)
+    fun searchRecipes(
+        title: String?,
+        difficulty: String?,
+        dishTypes: List<String>,
+        dishTypesCount: Int = dishTypes.size,
+        maxCookingTime: Int?
+    ): Flow<List<RecipeEntity>>
 
-    @Query("SELECT * FROM recipes WHERE tags LIKE '%' || :tag || '%'")
-    fun getRecipesByTag(tag: String): Flow<List<RecipeEntity>>
+//    @Query("SELECT * FROM recipes WHERE tags LIKE '%' || :tag || '%'")
+//    fun getRecipesByTag(tag: String): Flow<List<RecipeEntity>>
 
 }

@@ -59,6 +59,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.material3)
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.2")
     //Navigation
@@ -82,6 +83,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
 
     implementation(libs.coil.compose)
+    implementation("com.google.accompanist:accompanist-flowlayout:0.32.0")
 
 
 

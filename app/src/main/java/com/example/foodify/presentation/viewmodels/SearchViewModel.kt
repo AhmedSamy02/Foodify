@@ -1,14 +1,25 @@
-package com.example.foodify.viewmodels
+package com.example.foodify.presentation.viewmodels
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.foodify.data.local.RecipeEntity
 import com.example.foodify.datalocal.Recipe
-import com.example.foodify.data.repository.RecipeRepository
+import com.example.foodify.domain.repository.RecipeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.*
 import javax.inject.Inject
+
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val repository: RecipeRepository
@@ -16,26 +27,18 @@ class SearchViewModel @Inject constructor(
 
     var query by mutableStateOf("")
     var filterVisible by mutableStateOf(false)
-    var cookingTime by mutableStateOf(48f)
+    var cookingTime by mutableFloatStateOf(48f)
     var selectedDifficulty by mutableStateOf<String?>(null)
     var selectedDishTypes = mutableStateListOf<String>()
-    private val _recipes = MutableStateFlow<List<Recipe>>(emptyList())
-    val recipes: StateFlow<List<Recipe>> = _recipes.asStateFlow()
-    val filteredRecipes: List<Recipe>
-        get() = _recipes.value.filter { recipe ->
-            val matchesQuery = recipe.title.contains(query, ignoreCase = true)
-            val matchesDifficulty = selectedDifficulty?.let { it == recipe.difficulty } ?: true
-            val matchesDishType = if (selectedDishTypes.isNotEmpty()) selectedDishTypes.contains(recipe.dishType) else true
-            val matchesCookingTime = recipe.cookTime <= cookingTime.toInt()
-            matchesQuery && matchesDifficulty && matchesDishType && matchesCookingTime
-        }
+    private val _recipes = MutableStateFlow<List<RecipeEntity>>(emptyList())
+    val recipes: StateFlow<List<RecipeEntity>> = _recipes.asStateFlow()
 
     init {
         _recipes.value = listOf(
-            Recipe(1, "Pancakes", "Easy", "Breakfast", 20),
-            Recipe(2, "Spaghetti Bolognese", "Medium", "Lunch", 45),
-            Recipe(3, "Chocolate Cake", "Hard", "Dessert", 90),
-            Recipe(4, "Salad", "Easy", "Snack", 10)
+            RecipeEntity(1, "Pancakes", "Easy", listOf(),listOf(),"Easy", "Breakfast",45),
+            RecipeEntity(2, "Spaghetti Bolognese", "Medium", listOf(),listOf(),"Easy", "Breakfast",45),
+            RecipeEntity(3, "Chocolate Bolognese", "Medium", listOf(),listOf(),"Easy", "Breakfast",45),
+            RecipeEntity(4, "Spaghetti ", "Medium", listOf(),listOf(),"Easy", "Breakfast",45),
         )
 
         viewModelScope.launch {

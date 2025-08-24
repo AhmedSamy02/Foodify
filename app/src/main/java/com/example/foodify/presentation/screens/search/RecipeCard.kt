@@ -1,4 +1,4 @@
-package com.example.foodify.ui.search
+package com.example.foodify.presentation.screens.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

@@ -43,6 +43,7 @@ import com.example.foodify.presentation.screens.collection.CollectionDetailScree
 import com.example.foodify.presentation.screens.collection.CollectionScreen
 import com.example.foodify.presentation.screens.home.HomeScreen
 import com.example.foodify.presentation.screens.onboarding.OnBoardingScreen
+import com.example.foodify.presentation.screens.search.SearchScreen
 
 
 @Composable
@@ -66,6 +67,9 @@ fun NavGraph(navController: NavHostController, startDestination: String) {
                     navController.navigate("${Screen.CollectionDetail.route}/$collectionId")
                 }
             )
+        }
+        composable(Screen.Search.route) {
+            SearchScreen()
         }
         composable(route = Screen.CollectionDetail.route + "/{collectionId}",
             arguments = listOf(navArgument("collectionId") {
