@@ -1,11 +1,13 @@
 package com.example.foodify.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.foodify.presentation.screens.collection.CollectionDetailScreen
+import com.example.foodify.presentation.screens.collection.CollectionsScreen
 import com.example.foodify.presentation.screens.home.HomeScreen
 import com.example.foodify.presentation.screens.onboarding.OnBoardingScreen
 import com.example.foodify.presentation.screens.splash.SplashScreen
@@ -35,12 +37,12 @@ fun NavigationStack() {
             val collectionId = backStackEntry.arguments?.getInt("collectionId") ?: 0
             CollectionDetailScreen(navController, collectionId)
         }
-        composable(
-            Screen.RecipeDetail.route,
-            arguments = listOf(navArgument("recipeId") { type = NavType.IntType })
-        ) { backStackEntry ->
-            val recipeId = backStackEntry.arguments?.getInt("recipeId") ?: 0
-            RecipeDetailScreen(navController, recipeId)
-        }
-    }
+//        composable(
+//            Screen.RecipeDetail.route,
+//            arguments = listOf(navArgument("recipeId") { type = NavType.IntType })
+//        ) { backStackEntry ->
+//            val recipeId = backStackEntry.arguments?.getInt("recipeId") ?: 0
+//            RecipeDetailScreen(navController, recipeId)
+//        }
+   }
 }
