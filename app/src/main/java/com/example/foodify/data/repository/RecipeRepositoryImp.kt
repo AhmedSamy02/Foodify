@@ -1,32 +1,30 @@
 package com.example.foodify.data.repository
 
-import com.example.foodify.data.local.CollectionRecipeCrossRef
-import com.example.foodify.data.local.Recipe
+import com.example.foodify.data.local.RecipeEntity
 import com.example.foodify.data.database.RecipeDao
 import com.example.foodify.domain.repository.RecipeRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class RecipeRepositoryImp @Inject constructor(
     private val recipeDao: RecipeDao
 ) : RecipeRepository {
-    override suspend fun addRecipe(recipe: Recipe) {
+    override suspend fun addRecipe(recipe: RecipeEntity) {
         recipeDao.insertRecipe(recipe)
     }
 
     override fun searchRecipes(
         query: String,
         tags: List<String>
-    ): Flow<List<Recipe>> {
+    ): Flow<List<RecipeEntity>> {
         return recipeDao.searchRecipes(query)
     }
 
-    override suspend fun getRecipeById(id: String): Recipe? {
+    override suspend fun getRecipeById(id: String): RecipeEntity? {
         return recipeDao.getRecipeById(id)
     }
 
-    override suspend fun deleteRecipe(recipe: Recipe) {
+    override suspend fun deleteRecipe(recipe: RecipeEntity) {
         recipeDao.deleteRecipe(recipe)
     }
 //    private fun Recipe.toEntity(): Recipe{

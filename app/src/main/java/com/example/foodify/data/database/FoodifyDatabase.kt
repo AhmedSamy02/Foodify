@@ -4,10 +4,10 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.foodify.data.local.CollectionRecipeCrossRef
-import com.example.foodify.data.local.Recipe
-import com.example.foodify.data.local.Collection
+import com.example.foodify.data.local.RecipeEntity
+import com.example.foodify.data.local.CollectionEntity
 
-@Database(entities = [Collection::class, Recipe::class, CollectionRecipeCrossRef::class], version = 1, exportSchema = false)
+@Database(entities = [CollectionEntity::class, RecipeEntity::class, CollectionRecipeCrossRef::class], version = 1, exportSchema = false)
 @TypeConverters(Converter::class)
 abstract class FoodifyDatabase : RoomDatabase() {
     abstract fun recipeDao(): RecipeDao

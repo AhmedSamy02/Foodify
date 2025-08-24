@@ -1,9 +1,7 @@
 package com.example.foodify.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
-import com.example.foodify.data.local.CollectionRecipeCrossRef
-import com.example.foodify.data.local.Recipe
-import com.example.foodify.data.local.Collection
+import com.example.foodify.data.local.RecipeEntity
 import com.example.foodify.data.repository.RecipeRepositoryImp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -12,7 +10,7 @@ import javax.inject.Inject
 class LocalViewModel @Inject constructor(
     private val localRepository: RecipeRepositoryImp
 ): ViewModel(){
-    suspend fun insertRecipe(recipe: Recipe){
+    suspend fun insertRecipe(recipe: RecipeEntity){
         localRepository.addRecipe(recipe)
     }
 //    suspend fun getRecipes(): List<Recipe>{

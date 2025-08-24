@@ -1,24 +1,27 @@
 package com.example.foodify.data.database
 
+import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
-import com.example.foodify.data.local.Collection
+import com.example.foodify.data.local.CollectionEntity
 import com.example.foodify.data.local.CollectionRecipeCrossRef
-import com.example.foodify.data.local.Recipe
+import com.example.foodify.data.local.CollectionWithRecipes
+import com.example.foodify.data.local.RecipeEntity
 import kotlinx.coroutines.flow.Flow
-
+@Dao
 interface CollectionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCollection(collection: Collection)
+    suspend fun insertCollection(collection: CollectionEntity)
 
     @Update
-    suspend fun updateCollection(collection: Collection)
+    suspend fun updateCollection(collection: CollectionEntity)
 
     @Delete
-    suspend fun deleteCollection(collection: Collection)
+    suspend fun deleteCollection(collection: CollectionEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCollectionRecipeCrossRef(crossRef: CollectionRecipeCrossRef)
@@ -26,14 +29,15 @@ interface CollectionDao {
     @Delete
     suspend fun deleteCollectionRecipeCrossRef(crossRef: CollectionRecipeCrossRef)
 
+    @Transaction
     @Query("SELECT * FROM collections")
-    fun getAllCollections(): Flow<List<Collection>>
+    fun getAllCollectionsWithRecipes(): Flow<List<CollectionWithRecipes>>
 
-    @Query("SELECT R.* FROM recipes R INNER JOIN collection_recipe_cross_ref CR ON R.id = CR.recipeId WHERE CR.collectionId = :collectionId")
-    fun getRecipesForCollection(collectionId: String): Flow<List<Recipe>>
-
+    @Transaction
     @Query("SELECT * FROM collections WHERE id = :collectionId")
-    suspend fun getCollectionById(collectionId: String): Collection?
-}
+    fun getCollectionWithRecipes(collectionId: Int): Flow<CollectionWithRecipes?>
 
+    @Query("SELECT * FROM collections WHERE id = :collectionId LIMIT 1")
+    suspend fun getCollectionById(collectionId: Int): CollectionEntity?
+}
 

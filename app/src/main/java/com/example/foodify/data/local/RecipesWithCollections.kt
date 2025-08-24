@@ -5,7 +5,7 @@ import androidx.room.Junction
 import androidx.room.Relation
 
 data class RecipeWithCollections(
-    @Embedded val recipe: Recipe,
+    @Embedded val recipe: RecipeEntity,
     @Relation(
         parentColumn = "id",
         entityColumn = "id",
@@ -15,5 +15,5 @@ data class RecipeWithCollections(
             entityColumn = "collectionId"
         )
     )
-    val collections: List<Collection>
+    val collections: List<CollectionEntity>
 )

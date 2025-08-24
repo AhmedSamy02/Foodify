@@ -1,9 +1,12 @@
 package com.example.foodify.data.repository
 
 import com.example.foodify.data.database.CollectionDao
-import com.example.foodify.data.local.Collection
+import com.example.foodify.data.local.CollectionEntity
 import com.example.foodify.data.local.CollectionRecipeCrossRef
-import com.example.foodify.data.local.Recipe
+import com.example.foodify.data.local.CollectionWithRecipes
+import com.example.foodify.data.local.RecipeEntity
+import com.example.foodify.domain.model.Collection
+import com.example.foodify.domain.model.Recipe
 import com.example.foodify.domain.repository.CollectionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -16,14 +19,14 @@ class CollectionRepositoryImpl @Inject constructor(
         collectionDao.insertCollection(collection.toEntity())
     }
 
-    override suspend fun renameCollection(collectionId: String, newName: String) {
-       val collection = collectionDao.getCollectionById(collectionId)?.copy(title = newName)
-        collection?.let { collectionDao.updateCollection(it) }
+    override suspend fun renameCollection(collectionId: Int, newName: String) {
+        val entity = collectionDao.getCollectionById(collectionId)?.copy(title = newName)
+        entity?.let { collectionDao.updateCollection(it) }
     }
 
-    override suspend fun deleteCollection(collectionId: String) {
-        val collection = collectionDao.getCollectionById(collectionId)
-        collection?.let { collectionDao.deleteCollection(it) }
+    override suspend fun deleteCollection(collectionId: Int) {
+        val entity = collectionDao.getCollectionById(collectionId)
+        entity?.let { collectionDao.deleteCollection(it) }
     }
 
     override suspend fun addRecipeToCollection(collectionId: Int, recipeId: Int) {
@@ -32,41 +35,59 @@ class CollectionRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun removeRecipeFromCollection(collectionId: Int, recipeId: Int) {
+    override suspend fun removeRecipeFromCollection(
+        collectionId: Int,
+        recipeId: Int
+    ) {
         collectionDao.deleteCollectionRecipeCrossRef(
             CollectionRecipeCrossRef(collectionId, recipeId)
         )
     }
 
     override fun getCollections(): Flow<List<Collection>> {
-        return collectionDao.getAllCollections() .map { entities ->
-            entities.map { it.toDomain() }
+        return collectionDao.getAllCollectionsWithRecipes().map { list ->
+            list.map { it.toDomain() }
         }
     }
 
-    override fun getRecipesInCollection(collectionId: String): Flow<List<Recipe>> {
-        return collectionDao.getRecipesForCollection(collectionId).map { entities ->
-            entities.map { it.toDomain() }
+    override fun getRecipesInCollection(collectionId: Int): Flow<List<Recipe>> {
+        return collectionDao.getCollectionWithRecipes(collectionId).map { relation ->
+            relation?.recipes?.map { it.toDomain() } ?: emptyList()
         }
+    }
 
-    }
-    private fun Collection.toEntity(): Collection {
+    //mappers
+
+    private fun CollectionWithRecipes.toDomain(): Collection {
         return Collection(
-            id = id,
-            title = title,
-            recipes = recipes
-        )
-    }
-    private fun Collection.toDomain(): Collection {
-        return Collection(
-            id = id,
-            title = title,
-            recipes = recipes
+            id = collection.id,
+            title = collection.title,
+            recipes = recipes.map { it.toDomain() }
         )
     }
 
-    private fun Recipe.toDomain(): Recipe {
+
+
+    private fun Collection.toEntity(): CollectionEntity {
+        return CollectionEntity(
+            id = id,
+            title = title
+        )
+    }
+
+    private fun RecipeEntity.toDomain(): Recipe {
         return Recipe(
+            id = id,
+            title = title,
+            imageUrl = imageUrl,
+            ingredients = ingredients,
+            steps = steps,
+            tags = tags
+        )
+    }
+
+    private fun Recipe.toEntity(): RecipeEntity {
+        return RecipeEntity(
             id = id,
             title = title,
             imageUrl = imageUrl,

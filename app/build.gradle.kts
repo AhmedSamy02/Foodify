@@ -79,4 +79,7 @@ dependencies {
     implementation(libs.core.splashscreen)
     //Gson for type conversion list of Recipe inside Collection
     implementation("com.google.code.gson:gson:2.10.1")
+
+    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
 }

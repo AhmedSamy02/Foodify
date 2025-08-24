@@ -7,8 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
-import com.example.foodify.data.local.Recipe
-import com.example.foodify.data.local.Collection
+import com.example.foodify.data.local.RecipeEntity
 import com.example.foodify.presentation.navigation.NavigationStack
 import com.example.foodify.presentation.theme.FoodifyTheme
 import com.example.foodify.presentation.viewmodels.LocalViewModel
@@ -44,10 +43,11 @@ class MainActivity : ComponentActivity() {
 //            testCollectionInsertionAndRetrieval(viewModel,collection)
         }
     }
-    private suspend fun testRecipeInsertionAndRetrieval(viewModel: LocalViewModel,recipe: Recipe){
+    private suspend fun testRecipeInsertionAndRetrieval(viewModel: LocalViewModel,recipe: RecipeEntity){
             viewModel.insertRecipe(recipe)
 //            val recipes = viewModel.getRecipes()
-//            println(recipes)
+//
+
     }
 //    private suspend fun testCollectionInsertionAndRetrieval(viewModel: LocalViewModel,collection: Collection){
 //        viewModel.insertCollection(collection)
