@@ -15,7 +15,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface CollectionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCollection(collection: CollectionEntity)
+    suspend fun insertCollection(collection: CollectionEntity): Long
+
+
+
 
     @Update
     suspend fun updateCollection(collection: CollectionEntity)
@@ -37,7 +40,7 @@ interface CollectionDao {
     @Query("SELECT * FROM collections WHERE id = :collectionId")
     fun getCollectionWithRecipes(collectionId: Int): Flow<CollectionWithRecipes?>
 
-    @Query("SELECT * FROM collections WHERE id = :collectionId LIMIT 1")
+    @Query("SELECT * FROM collections WHERE id = :collectionId")
     suspend fun getCollectionById(collectionId: Int): CollectionEntity?
 }
 

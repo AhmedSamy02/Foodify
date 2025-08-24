@@ -7,5 +7,8 @@ import androidx.room.PrimaryKey
 data class CollectionEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val title: String,
+    val description: String = "",
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
     //val recipes: List<Recipe>
 )

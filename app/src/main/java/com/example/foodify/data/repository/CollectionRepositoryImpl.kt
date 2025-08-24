@@ -1,5 +1,7 @@
 package com.example.foodify.data.repository
 
+import android.R.attr.id
+import android.R.attr.name
 import com.example.foodify.data.database.CollectionDao
 import com.example.foodify.data.local.CollectionEntity
 import com.example.foodify.data.local.CollectionRecipeCrossRef
@@ -15,18 +17,18 @@ import javax.inject.Inject
 class CollectionRepositoryImpl @Inject constructor(
     private val collectionDao: CollectionDao
 ): CollectionRepository {
-    override suspend fun createCollection(collection: Collection) {
-        collectionDao.insertCollection(collection.toEntity())
+    override suspend fun createCollection(collection: Collection): Long {
+        return collectionDao.insertCollection(collection.toEntity())
     }
 
-    override suspend fun renameCollection(collectionId: Int, newName: String) {
-        val entity = collectionDao.getCollectionById(collectionId)?.copy(title = newName)
-        entity?.let { collectionDao.updateCollection(it) }
+
+
+    override suspend fun renameCollection(collection: Collection) {
+      collectionDao.updateCollection(collection.toEntity())
     }
 
-    override suspend fun deleteCollection(collectionId: Int) {
-        val entity = collectionDao.getCollectionById(collectionId)
-        entity?.let { collectionDao.deleteCollection(it) }
+    override suspend fun deleteCollection(collection: Collection) {
+        collectionDao.deleteCollection(collection.toEntity())
     }
 
     override suspend fun addRecipeToCollection(collectionId: Int, recipeId: Int) {
@@ -44,19 +46,53 @@ class CollectionRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun getCollections(): Flow<List<Collection>> {
-        return collectionDao.getAllCollectionsWithRecipes().map { list ->
-            list.map { it.toDomain() }
+//    override fun getCollections(): Flow<List<Collection>> {
+//        return collectionDao.getAllCollectionsWithRecipes().map { list ->
+//            list.map { it.toDomain() }
+//        }
+//    }
+
+    override suspend fun getCollectionById(id: Int): Collection? {
+        return collectionDao.getCollectionById(id)?.toDomain()
+    }
+
+    override fun getAllCollectionsWithRecipes(): Flow<List<Collection>> {
+        return collectionDao.getAllCollectionsWithRecipes().map { collectionsWithRecipes ->
+            collectionsWithRecipes.map { collectionWithRecipes ->
+                Collection(
+                    id = collectionWithRecipes.collection.id,
+                    title = collectionWithRecipes.collection.title,
+                    description = collectionWithRecipes.collection.description,
+                    recipes = collectionWithRecipes.recipes.map { it.toDomain() },
+                    recipeCount = collectionWithRecipes.recipes.size,
+                    createdAt = collectionWithRecipes.collection.createdAt,
+                    updatedAt = collectionWithRecipes.collection.updatedAt
+                )
+            }
         }
     }
 
-    override fun getRecipesInCollection(collectionId: Int): Flow<List<Recipe>> {
-        return collectionDao.getCollectionWithRecipes(collectionId).map { relation ->
-            relation?.recipes?.map { it.toDomain() } ?: emptyList()
-        }
-    }
 
     //mappers
+    fun CollectionEntity.toDomain(): Collection {
+        return Collection(
+            id = id,
+            title = title,
+            description = description,
+            createdAt = createdAt,
+            updatedAt = updatedAt
+        )
+    }
+
+    fun Collection.toEntity(): CollectionEntity {
+        return CollectionEntity(
+            id = id,
+            title = title,
+            description = description,
+            createdAt = createdAt,
+            updatedAt = updatedAt
+        )
+    }
 
     private fun CollectionWithRecipes.toDomain(): Collection {
         return Collection(
@@ -68,12 +104,7 @@ class CollectionRepositoryImpl @Inject constructor(
 
 
 
-    private fun Collection.toEntity(): CollectionEntity {
-        return CollectionEntity(
-            id = id,
-            title = title
-        )
-    }
+
 
     private fun RecipeEntity.toDomain(): Recipe {
         return Recipe(

@@ -7,11 +7,14 @@ import com.example.foodify.domain.model.Recipe
 import kotlinx.coroutines.flow.Flow
 
 interface CollectionRepository {
-    suspend fun createCollection(collection: Collection)
-    suspend fun renameCollection(collectionId: Int, newName: String)
-    suspend fun deleteCollection(collectionId: Int)
+    suspend fun createCollection(collection: Collection): Long
+    suspend fun renameCollection(collection: Collection)
+    suspend fun deleteCollection(collection: Collection)
     suspend fun addRecipeToCollection(collectionId: Int, recipeId: Int)
     suspend fun removeRecipeFromCollection(collectionId: Int, recipeId: Int)
-    fun getCollections(): Flow<List<Collection>>
-    fun getRecipesInCollection(collectionId: Int): Flow<List<Recipe>>
+    //fun getCollections(): Flow<List<Collection>>
+
+    suspend fun getCollectionById(id: Int): Collection?
+
+    fun getAllCollectionsWithRecipes(): Flow<List<Collection>>
 }
