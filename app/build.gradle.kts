@@ -65,6 +65,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.9.2")
     //Glide
     implementation("com.github.bumptech.glide:glide:4.15.1")
+    implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
     // Room
     implementation("androidx.room:room-runtime:2.7.2")
     ksp("androidx.room:room-compiler:2.7.2")

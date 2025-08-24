@@ -1,6 +1,7 @@
 package com.example.foodify.presentation.navigation
 
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -37,14 +38,35 @@ import com.example.foodify.presentation.screens.splash.SplashScreen
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.foodify.presentation.screens.add_recipe.AddRecipeScreen
 import com.example.foodify.presentation.screens.collection.CollectionDetailScreen
-
+import com.example.foodify.presentation.screens.collection.CollectionScreen
+import com.example.foodify.presentation.screens.home.HomeScreen
+import com.example.foodify.presentation.screens.onboarding.OnBoardingScreen
 
 
 @Composable
 fun NavGraph(navController: NavHostController, startDestination: String) {
     NavHost(navController = navController, startDestination = startDestination) {
-
+        composable(startDestination) {
+            SplashScreen(navController)
+        }
+        composable(Screen.OnBoarding.route) {
+            OnBoardingScreen(navController)
+        }
+        composable(Screen.Home.route) {
+            HomeScreen(navController)
+        }
+        composable(Screen.Add.route) {
+            AddRecipeScreen(navController)
+        }
+        composable(Screen.Save.route) {
+            CollectionScreen(
+                onCollectionClick = { collectionId ->
+                    navController.navigate("${Screen.CollectionDetail.route}/$collectionId")
+                }
+            )
+        }
         composable(route = Screen.CollectionDetail.route + "/{collectionId}",
             arguments = listOf(navArgument("collectionId") {
                 type = NavType.LongType
@@ -73,6 +95,7 @@ fun NavGraph(navController: NavHostController, startDestination: String) {
         val screen: Screen, val label: String, val iconRes: Int
     )
 
+    @SuppressLint("UnusedBoxWithConstraintsScope")
     @Composable
     fun CustomBottomBar(
         navController: NavController,

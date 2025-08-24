@@ -14,3 +14,5 @@ val MainColor = Color(0xFF4058A0)
 val LoadingCircleColor = Color(0xFFDEE21B)
 val OnBoarding2Color = Color(0xFFFF6339)
 val OnBoarding3Color = Color(0xFFDEE21B)
+
+val AddRecipeContainerTitleColor = Color(0xFFFF6339)

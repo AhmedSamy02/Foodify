@@ -9,6 +9,7 @@ import com.example.foodify.data.repository.CollectionRepositoryImpl
 import com.example.foodify.data.repository.RecipeRepositoryImp
 import com.example.foodify.domain.repository.CollectionRepository
 import com.example.foodify.domain.repository.RecipeRepository
+import com.example.foodify.domain.usecase.AddRecipeUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -51,6 +52,10 @@ object AppModule {
     fun provideCollectionRepository(db: FoodifyDatabase): CollectionRepository {
         return CollectionRepositoryImpl(db.collectionDao())
     }
-
+    @Singleton
+    @Provides
+    fun provideAddRecipeUseCase(repo: RecipeRepository): AddRecipeUseCase {
+        return AddRecipeUseCase(repo)
+    }
 
 }
