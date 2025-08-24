@@ -1,0 +1,104 @@
+Index: app/src/main/java/com/example/foodify/di/AppModule.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.foodify.di\r\n\r\nimport android.content.Context\r\nimport androidx.room.Room\r\n<<<<<<< HEAD\r\nimport com.example.foodify.dao.RecipeDao\r\nimport com.example.foodify.data.repository.RecipeRepository\r\nimport com.example.foodify.data.repository.RecipeRepositoryImpl\r\nimport com.example.foodify.datalocal.RecipeDatabase\r\n=======\r\nimport com.example.foodify.database.FoodifyDatabase\r\n>>>>>>> ae251d8a16acf6f892e0157263f840bda7825f85\r\nimport dagger.Module\r\nimport dagger.Provides\r\nimport dagger.hilt.InstallIn\r\nimport dagger.hilt.android.qualifiers.ApplicationContext\r\nimport dagger.hilt.components.SingletonComponent\r\nimport javax.inject.Singleton\r\n@Module\r\n@InstallIn(SingletonComponent::class)\r\nobject AppModule {\r\n<<<<<<< HEAD\r\n    @Provides\r\n    @Singleton\r\n    fun provideRepository(dao: RecipeDao): RecipeRepository = RecipeRepositoryImpl(dao)\r\n=======\r\n    @Singleton\r\n    @Provides\r\n    fun provideFoodifyDatabase(@ApplicationContext context: Context): FoodifyDatabase {\r\n        return Room.databaseBuilder(\r\n                context,\r\n                FoodifyDatabase::class.java,\r\n                \"foodify_database\"\r\n            ).fallbackToDestructiveMigration(false).build()\r\n    }\r\n    @Singleton\r\n    @Provides\r\n    fun provideFoodifyDao(foodifyDatabase: FoodifyDatabase) = foodifyDatabase.dao\r\n\r\n>>>>>>> ae251d8a16acf6f892e0157263f840bda7825f85\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/di/AppModule.kt b/app/src/main/java/com/example/foodify/di/AppModule.kt
+--- a/app/src/main/java/com/example/foodify/di/AppModule.kt	(revision 4076de3a0dbfa5c22f93471966a705cdff84cf4e)
++++ b/app/src/main/java/com/example/foodify/di/AppModule.kt	(date 1755982064120)
+@@ -2,14 +2,11 @@
+ 
+ import android.content.Context
+ import androidx.room.Room
+-<<<<<<< HEAD
+ import com.example.foodify.dao.RecipeDao
+ import com.example.foodify.data.repository.RecipeRepository
+ import com.example.foodify.data.repository.RecipeRepositoryImpl
+ import com.example.foodify.datalocal.RecipeDatabase
+-=======
+ import com.example.foodify.database.FoodifyDatabase
+->>>>>>> ae251d8a16acf6f892e0157263f840bda7825f85
+ import dagger.Module
+ import dagger.Provides
+ import dagger.hilt.InstallIn
+@@ -19,11 +16,9 @@
+ @Module
+ @InstallIn(SingletonComponent::class)
+ object AppModule {
+-<<<<<<< HEAD
+     @Provides
+     @Singleton
+     fun provideRepository(dao: RecipeDao): RecipeRepository = RecipeRepositoryImpl(dao)
+-=======
+     @Singleton
+     @Provides
+     fun provideFoodifyDatabase(@ApplicationContext context: Context): FoodifyDatabase {
+@@ -37,5 +32,4 @@
+     @Provides
+     fun provideFoodifyDao(foodifyDatabase: FoodifyDatabase) = foodifyDatabase.dao
+ 
+->>>>>>> ae251d8a16acf6f892e0157263f840bda7825f85
+ }
+\ No newline at end of file
+Index: app/build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>plugins {\r\n    alias(libs.plugins.android.application)\r\n    alias(libs.plugins.kotlin.android)\r\n    alias(libs.plugins.kotlin.compose)\r\n    id(\"com.google.dagger.hilt.android\")\r\n    id(\"com.google.devtools.ksp\")\r\n}\r\n\r\n\r\nandroid {\r\n    namespace = \"com.example.foodify\"\r\n    compileSdk = 36\r\n\r\n    defaultConfig {\r\n        applicationId = \"com.example.foodify\"\r\n        minSdk = 24\r\n        targetSdk = 36\r\n        versionCode = 1\r\n        versionName = \"1.0\"\r\n\r\n        testInstrumentationRunner = \"androidx.test.runner.AndroidJUnitRunner\"\r\n    }\r\n\r\n    buildTypes {\r\n        release {\r\n            isMinifyEnabled = false\r\n            proguardFiles(\r\n                getDefaultProguardFile(\"proguard-android-optimize.txt\"),\r\n                \"proguard-rules.pro\"\r\n            )\r\n        }\r\n    }\r\n    compileOptions {\r\n        sourceCompatibility = JavaVersion.VERSION_11\r\n        targetCompatibility = JavaVersion.VERSION_11\r\n    }\r\n    kotlinOptions {\r\n        jvmTarget = \"11\"\r\n    }\r\n    buildFeatures {\r\n        compose = true\r\n    }\r\n}\r\n\r\ndependencies {\r\n    implementation(platform(\"androidx.compose:compose-bom:2024.08.00\"))\r\n    implementation(\"androidx.compose.material:material-icons-extended\")\r\n    implementation(libs.androidx.core.ktx)\r\n    implementation(libs.androidx.lifecycle.runtime.ktx)\r\n    implementation(libs.androidx.activity.compose)\r\n    implementation(platform(libs.androidx.compose.bom))\r\n    implementation(libs.androidx.ui)\r\n    implementation(libs.androidx.ui.graphics)\r\n    implementation(libs.androidx.ui.tooling.preview)\r\n    implementation(libs.androidx.material3)\r\n    implementation(libs.material3)\r\n    testImplementation(libs.junit)\r\n    androidTestImplementation(libs.androidx.junit)\r\n    androidTestImplementation(libs.androidx.espresso.core)\r\n    androidTestImplementation(platform(libs.androidx.compose.bom))\r\n    androidTestImplementation(libs.androidx.ui.test.junit4)\r\n    debugImplementation(libs.androidx.ui.tooling)\r\n    debugImplementation(libs.androidx.ui.test.manifest)\r\n    // ViewModel\r\n    implementation(\"androidx.lifecycle:lifecycle-viewmodel-compose:2.9.2\")\r\n    //Navigation\r\n    implementation(\"androidx.navigation:navigation-compose:2.9.2\")\r\n    //Glide\r\n    implementation(\"com.github.bumptech.glide:glide:4.15.1\")\r\n    // Room\r\n    implementation(\"androidx.room:room-runtime:2.7.2\")\r\n    ksp(\"androidx.room:room-compiler:2.7.2\")\r\n    implementation(\"androidx.room:room-ktx:2.7.2\")\r\n    // Datastore\r\n    implementation(\"androidx.datastore:datastore-preferences:1.1.7\")\r\n    // Dagger Hilt\r\n    implementation(\"com.google.dagger:hilt-android:2.57\")\r\n    ksp(\"com.google.dagger:hilt-android-compiler:2.57\")\r\n    implementation(\"androidx.hilt:hilt-navigation-compose:1.2.0\")\r\n    // Splash screen\r\n    implementation(libs.core.splashscreen)\r\n<<<<<<< HEAD\r\n    implementation(\"io.coil-kt:coil-compose:2.4.0\")\r\n    implementation(\"com.google.accompanist:accompanist-flowlayout:0.32.0\")\r\n=======\r\n    //Gson for type conversion list of Recipe inside Collection\r\n    implementation(\"com.google.code.gson:gson:2.10.1\")\r\n>>>>>>> ae251d8a16acf6f892e0157263f840bda7825f85\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/build.gradle.kts b/app/build.gradle.kts
+--- a/app/build.gradle.kts	(revision 4076de3a0dbfa5c22f93471966a705cdff84cf4e)
++++ b/app/build.gradle.kts	(date 1755981919920)
+@@ -79,11 +79,9 @@
+     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+     // Splash screen
+     implementation(libs.core.splashscreen)
+-<<<<<<< HEAD
+     implementation("io.coil-kt:coil-compose:2.4.0")
+     implementation("com.google.accompanist:accompanist-flowlayout:0.32.0")
+-=======
++
+     //Gson for type conversion list of Recipe inside Collection
+     implementation("com.google.code.gson:gson:2.10.1")
+->>>>>>> ae251d8a16acf6f892e0157263f840bda7825f85
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/example/foodify/MainActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.foodify\r\n\r\nimport android.os.Bundle\r\nimport androidx.activity.ComponentActivity\r\nimport androidx.activity.compose.setContent\r\nimport androidx.activity.enableEdgeToEdge\r\n<<<<<<< HEAD\r\nimport androidx.compose.foundation.layout.Box\r\nimport androidx.compose.foundation.layout.fillMaxSize\r\nimport androidx.compose.foundation.layout.padding\r\nimport androidx.compose.material3.Scaffold\r\nimport androidx.compose.material3.Text\r\nimport androidx.compose.runtime.Composable\r\nimport androidx.compose.runtime.LaunchedEffect\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.tooling.preview.Preview\r\n=======\r\nimport androidx.activity.viewModels\r\n>>>>>>> ae251d8a16acf6f892e0157263f840bda7825f85\r\nimport androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen\r\nimport androidx.hilt.navigation.compose.hiltViewModel\r\nimport androidx.lifecycle.lifecycleScope\r\nimport com.example.foodify.data.models.Recipe\r\nimport com.example.foodify.data.models.Collection\r\nimport com.example.foodify.ui.navigation.NavigationStack\r\nimport com.example.foodify.ui.search.SearchScreen\r\nimport com.example.foodify.ui.theme.FoodifyTheme\r\nimport com.example.foodify.viewmodels.LocalViewModel\r\nimport dagger.hilt.android.AndroidEntryPoint\r\nimport kotlinx.coroutines.launch\r\n/*\r\n@AndroidEntryPoint\r\nclass MainActivity : ComponentActivity() {\r\n    val viewModel by viewModels<LocalViewModel>()\r\n    val recipe = Recipe(\r\n        id = 1,\r\n        title = \"Pizza\",\r\n        ingredients = listOf(\"Pizza Ingredients\", \"Pizza Ingredients\"),\r\n        steps = listOf(\"Pizza Instructions\", \"Pizza Instructions\"),\r\n        tags = listOf(\"Pizza\", \"Italian\"),\r\n    )\r\n    val collection = Collection(\r\n        id = 1,\r\n        title = \"Pizza\",\r\n        recipes = listOf(recipe,recipe)\r\n    )\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        installSplashScreen()\r\n        super.onCreate(savedInstanceState)\r\n        enableEdgeToEdge()\r\n        setContent {\r\n            FoodifyTheme {\r\n                NavigationStack()\r\n            }\r\n        }\r\n        lifecycleScope.launch {\r\n            testRecipeInsertionAndRetrieval(viewModel,recipe)\r\n            testCollectionInsertionAndRetrieval(viewModel,collection)\r\n        }\r\n    }\r\n    private suspend fun testRecipeInsertionAndRetrieval(viewModel: LocalViewModel,recipe: Recipe){\r\n            viewModel.insertRecipe(recipe)\r\n            val recipes = viewModel.getRecipes()\r\n            println(recipes)\r\n    }\r\n    private suspend fun testCollectionInsertionAndRetrieval(viewModel: LocalViewModel,collection: Collection){\r\n        viewModel.insertCollection(collection)\r\n        val collections = viewModel.getCollections()\r\n        println(collections)\r\n    }\r\n}\r\n*/\r\n@AndroidEntryPoint\r\nclass MainActivity : ComponentActivity() {\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        setContent {\r\n            FoodifyTheme {\r\n\r\n\r\n                SearchScreen()\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/MainActivity.kt b/app/src/main/java/com/example/foodify/MainActivity.kt
+--- a/app/src/main/java/com/example/foodify/MainActivity.kt	(revision 4076de3a0dbfa5c22f93471966a705cdff84cf4e)
++++ b/app/src/main/java/com/example/foodify/MainActivity.kt	(date 1755981817944)
+@@ -4,25 +4,6 @@
+ import androidx.activity.ComponentActivity
+ import androidx.activity.compose.setContent
+ import androidx.activity.enableEdgeToEdge
+-<<<<<<< HEAD
+-import androidx.compose.foundation.layout.Box
+-import androidx.compose.foundation.layout.fillMaxSize
+-import androidx.compose.foundation.layout.padding
+-import androidx.compose.material3.Scaffold
+-import androidx.compose.material3.Text
+-import androidx.compose.runtime.Composable
+-import androidx.compose.runtime.LaunchedEffect
+-import androidx.compose.ui.Modifier
+-import androidx.compose.ui.tooling.preview.Preview
+-=======
+-import androidx.activity.viewModels
+->>>>>>> ae251d8a16acf6f892e0157263f840bda7825f85
+-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+-import androidx.hilt.navigation.compose.hiltViewModel
+-import androidx.lifecycle.lifecycleScope
+-import com.example.foodify.data.models.Recipe
+-import com.example.foodify.data.models.Collection
+-import com.example.foodify.ui.navigation.NavigationStack
+ import com.example.foodify.ui.search.SearchScreen
+ import com.example.foodify.ui.theme.FoodifyTheme
+ import com.example.foodify.viewmodels.LocalViewModel

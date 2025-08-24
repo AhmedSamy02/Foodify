@@ -1,0 +1,32 @@
+Index: app/src/main/java/com/example/foodify/MainActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.foodify\r\n\r\nimport android.os.Bundle\r\nimport androidx.activity.ComponentActivity\r\nimport androidx.activity.compose.setContent\r\nimport androidx.activity.enableEdgeToEdge\r\n<<<<<<< HEAD\r\nimport androidx.compose.foundation.layout.Box\r\nimport androidx.compose.foundation.layout.fillMaxSize\r\nimport androidx.compose.foundation.layout.padding\r\nimport androidx.compose.material3.Scaffold\r\nimport androidx.compose.material3.Text\r\nimport androidx.compose.runtime.Composable\r\nimport androidx.compose.runtime.LaunchedEffect\r\nimport androidx.compose.ui.Modifier\r\nimport androidx.compose.ui.tooling.preview.Preview\r\n=======\r\nimport androidx.activity.viewModels\r\n>>>>>>> ae251d8a16acf6f892e0157263f840bda7825f85\r\nimport androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen\r\nimport androidx.hilt.navigation.compose.hiltViewModel\r\nimport androidx.lifecycle.lifecycleScope\r\nimport com.example.foodify.data.models.Recipe\r\nimport com.example.foodify.data.models.Collection\r\nimport com.example.foodify.ui.navigation.NavigationStack\r\nimport com.example.foodify.ui.search.SearchScreen\r\nimport com.example.foodify.ui.theme.FoodifyTheme\r\nimport com.example.foodify.viewmodels.LocalViewModel\r\nimport dagger.hilt.android.AndroidEntryPoint\r\nimport kotlinx.coroutines.launch\r\n/*\r\n@AndroidEntryPoint\r\nclass MainActivity : ComponentActivity() {\r\n    val viewModel by viewModels<LocalViewModel>()\r\n    val recipe = Recipe(\r\n        id = 1,\r\n        title = \"Pizza\",\r\n        ingredients = listOf(\"Pizza Ingredients\", \"Pizza Ingredients\"),\r\n        steps = listOf(\"Pizza Instructions\", \"Pizza Instructions\"),\r\n        tags = listOf(\"Pizza\", \"Italian\"),\r\n    )\r\n    val collection = Collection(\r\n        id = 1,\r\n        title = \"Pizza\",\r\n        recipes = listOf(recipe,recipe)\r\n    )\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        installSplashScreen()\r\n        super.onCreate(savedInstanceState)\r\n        enableEdgeToEdge()\r\n        setContent {\r\n            FoodifyTheme {\r\n                NavigationStack()\r\n            }\r\n        }\r\n        lifecycleScope.launch {\r\n            testRecipeInsertionAndRetrieval(viewModel,recipe)\r\n            testCollectionInsertionAndRetrieval(viewModel,collection)\r\n        }\r\n    }\r\n    private suspend fun testRecipeInsertionAndRetrieval(viewModel: LocalViewModel,recipe: Recipe){\r\n            viewModel.insertRecipe(recipe)\r\n            val recipes = viewModel.getRecipes()\r\n            println(recipes)\r\n    }\r\n    private suspend fun testCollectionInsertionAndRetrieval(viewModel: LocalViewModel,collection: Collection){\r\n        viewModel.insertCollection(collection)\r\n        val collections = viewModel.getCollections()\r\n        println(collections)\r\n    }\r\n}\r\n*/\r\n@AndroidEntryPoint\r\nclass MainActivity : ComponentActivity() {\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        setContent {\r\n            FoodifyTheme {\r\n\r\n\r\n                SearchScreen()\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/MainActivity.kt b/app/src/main/java/com/example/foodify/MainActivity.kt
+--- a/app/src/main/java/com/example/foodify/MainActivity.kt	(revision 4076de3a0dbfa5c22f93471966a705cdff84cf4e)
++++ b/app/src/main/java/com/example/foodify/MainActivity.kt	(date 1755971376846)
+@@ -3,21 +3,6 @@
+ import android.os.Bundle
+ import androidx.activity.ComponentActivity
+ import androidx.activity.compose.setContent
+-import androidx.activity.enableEdgeToEdge
+-<<<<<<< HEAD
+-import androidx.compose.foundation.layout.Box
+-import androidx.compose.foundation.layout.fillMaxSize
+-import androidx.compose.foundation.layout.padding
+-import androidx.compose.material3.Scaffold
+-import androidx.compose.material3.Text
+-import androidx.compose.runtime.Composable
+-import androidx.compose.runtime.LaunchedEffect
+-import androidx.compose.ui.Modifier
+-import androidx.compose.ui.tooling.preview.Preview
+-=======
+-import androidx.activity.viewModels
+->>>>>>> ae251d8a16acf6f892e0157263f840bda7825f85
+-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+ import androidx.hilt.navigation.compose.hiltViewModel
+ import androidx.lifecycle.lifecycleScope
+ import com.example.foodify.data.models.Recipe
