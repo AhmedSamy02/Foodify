@@ -12,6 +12,7 @@ import androidx.navigation.NavController
 import com.example.foodify.data.local.RecipeEntity
 import com.example.foodify.domain.usecase.AddRecipeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -133,12 +134,12 @@ class AddRecipeViewModel @Inject constructor(private val useCase: AddRecipeUseCa
                             )
                         )
                         res.fold(onSuccess = { u ->
+                            state = state.copy(
+                                isLoading = false,
+                                errorMessage = "Added Successfully"
+                            )
+                            delay(3000)
                             clearAll()
-                            Toast.makeText(
-                                context!!,
-                                "Recipe Added Successfully",
-                                Toast.LENGTH_SHORT
-                            ).show()
                         }, onFailure = {
                             state = state.copy(
                                 isLoading = false,

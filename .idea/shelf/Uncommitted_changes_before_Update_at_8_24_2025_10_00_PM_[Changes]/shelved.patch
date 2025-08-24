@@ -1,0 +1,1584 @@
+Index: app/src/main/java/com/example/foodify/data/database/CollectionDao.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.foodify.data.database\r\n\r\nimport androidx.room.Delete\r\nimport androidx.room.Insert\r\nimport androidx.room.OnConflictStrategy\r\nimport androidx.room.Query\r\nimport androidx.room.Update\r\nimport com.example.foodify.data.local.Collection\r\nimport com.example.foodify.data.local.CollectionRecipeCrossRef\r\nimport com.example.foodify.data.local.Recipe\r\nimport kotlinx.coroutines.flow.Flow\r\n\r\ninterface CollectionDao {\r\n    @Insert(onConflict = OnConflictStrategy.REPLACE)\r\n    suspend fun insertCollection(collection: Collection)\r\n\r\n    @Update\r\n    suspend fun updateCollection(collection: Collection)\r\n\r\n    @Delete\r\n    suspend fun deleteCollection(collection: Collection)\r\n\r\n    @Insert(onConflict = OnConflictStrategy.REPLACE)\r\n    suspend fun insertCollectionRecipeCrossRef(crossRef: CollectionRecipeCrossRef)\r\n\r\n    @Delete\r\n    suspend fun deleteCollectionRecipeCrossRef(crossRef: CollectionRecipeCrossRef)\r\n\r\n    @Query(\"SELECT * FROM collections\")\r\n    fun getAllCollections(): Flow<List<Collection>>\r\n\r\n    @Query(\"SELECT R.* FROM recipes R INNER JOIN collection_recipe_cross_ref CR ON R.id = CR.recipeId WHERE CR.collectionId = :collectionId\")\r\n    fun getRecipesForCollection(collectionId: String): Flow<List<Recipe>>\r\n\r\n    @Query(\"SELECT * FROM collections WHERE id = :collectionId\")\r\n    suspend fun getCollectionById(collectionId: String): Collection?\r\n}\r\n\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/data/database/CollectionDao.kt b/app/src/main/java/com/example/foodify/data/database/CollectionDao.kt
+--- a/app/src/main/java/com/example/foodify/data/database/CollectionDao.kt	(revision b81e38a48e6091bfaecc2e943e652570229d468d)
++++ b/app/src/main/java/com/example/foodify/data/database/CollectionDao.kt	(date 1756039112493)
+@@ -1,5 +1,6 @@
+ package com.example.foodify.data.database
+ 
++import androidx.room.Dao
+ import androidx.room.Delete
+ import androidx.room.Insert
+ import androidx.room.OnConflictStrategy
+@@ -10,6 +11,7 @@
+ import com.example.foodify.data.local.Recipe
+ import kotlinx.coroutines.flow.Flow
+ 
++@Dao
+ interface CollectionDao {
+     @Insert(onConflict = OnConflictStrategy.REPLACE)
+     suspend fun insertCollection(collection: Collection)
+Index: app/src/main/java/com/example/foodify/di/AppModule.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.foodify.di\r\n\r\nimport android.content.Context\r\nimport androidx.room.Room\r\nimport com.example.foodify.data.database.CollectionDao\r\nimport com.example.foodify.data.database.FoodifyDatabase\r\nimport com.example.foodify.data.database.RecipeDao\r\nimport com.example.foodify.data.repository.CollectionRepositoryImpl\r\nimport com.example.foodify.data.repository.RecipeRepositoryImp\r\nimport com.example.foodify.domain.repository.CollectionRepository\r\nimport com.example.foodify.domain.repository.RecipeRepository\r\nimport dagger.Module\r\nimport dagger.Provides\r\nimport dagger.hilt.InstallIn\r\nimport dagger.hilt.android.qualifiers.ApplicationContext\r\nimport dagger.hilt.components.SingletonComponent\r\nimport javax.inject.Singleton\r\n\r\n@Module\r\n@InstallIn(SingletonComponent::class)\r\nobject AppModule {\r\n    @Singleton\r\n    @Provides\r\n    fun provideFoodifyDatabase(@ApplicationContext context: Context): FoodifyDatabase {\r\n        return Room.databaseBuilder(\r\n            context,\r\n            FoodifyDatabase::class.java,\r\n            \"foodify_database\"\r\n        ).build()\r\n    }\r\n    @Singleton\r\n    @Provides\r\n    fun provideRecipeDao(foodifyDatabase: FoodifyDatabase): RecipeDao {\r\n        return foodifyDatabase.recipeDao()\r\n    }\r\n\r\n    @Singleton\r\n    @Provides\r\n    fun provideCollectionDao(foodifyDatabase: FoodifyDatabase) : CollectionDao {\r\n        return foodifyDatabase.collectionDao()\r\n    }\r\n\r\n    @Provides\r\n    @Singleton\r\n    fun provideRecipeRepository(db: FoodifyDatabase): RecipeRepository {\r\n        return RecipeRepositoryImp(db.recipeDao())\r\n    }\r\n\r\n    @Provides\r\n    @Singleton\r\n    fun provideCollectionRepository(db: FoodifyDatabase): CollectionRepository {\r\n        return CollectionRepositoryImpl(db.collectionDao())\r\n    }\r\n\r\n\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/di/AppModule.kt b/app/src/main/java/com/example/foodify/di/AppModule.kt
+--- a/app/src/main/java/com/example/foodify/di/AppModule.kt	(revision b81e38a48e6091bfaecc2e943e652570229d468d)
++++ b/app/src/main/java/com/example/foodify/di/AppModule.kt	(date 1756039831967)
+@@ -9,6 +9,8 @@
+ import com.example.foodify.data.repository.RecipeRepositoryImp
+ import com.example.foodify.domain.repository.CollectionRepository
+ import com.example.foodify.domain.repository.RecipeRepository
++import com.example.foodify.domain.useCase.AddRecipeUseCase
++import com.example.foodify.domain.useCase.AddRecipeUseCase_Factory
+ import dagger.Module
+ import dagger.Provides
+ import dagger.hilt.InstallIn
+@@ -51,6 +53,10 @@
+     fun provideCollectionRepository(db: FoodifyDatabase): CollectionRepository {
+         return CollectionRepositoryImpl(db.collectionDao())
+     }
+-
++    @Singleton
++    @Provides
++    fun provideAddRecipeUseCase(repo: RecipeRepository): AddRecipeUseCase{
++        return AddRecipeUseCase(repo)
++    }
+ 
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddStepField.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddStepField.kt b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddStepField.kt
+new file mode 100644
+--- /dev/null	(date 1756061144481)
++++ b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddStepField.kt	(date 1756061144481)
+@@ -0,0 +1,72 @@
++package com.example.foodify.presentation.screens.add_recipe.components
++
++import androidx.compose.foundation.layout.Arrangement
++import androidx.compose.foundation.layout.Row
++import androidx.compose.foundation.layout.fillMaxWidth
++import androidx.compose.foundation.layout.padding
++import androidx.compose.foundation.layout.size
++import androidx.compose.foundation.shape.CircleShape
++import androidx.compose.material.icons.Icons
++import androidx.compose.material.icons.filled.Add
++import androidx.compose.material3.Button
++import androidx.compose.material3.ButtonDefaults
++import androidx.compose.material3.Icon
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.compose.runtime.mutableStateOf
++import androidx.compose.runtime.remember
++import androidx.compose.runtime.setValue
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.unit.dp
++import com.example.foodify.presentation.components.ValidatedOutlinedTextField
++import com.example.foodify.presentation.theme.AddRecipeContainerTitleColor
++
++@Composable
++fun AddStepField(
++    onAddStep: (String) -> Unit = {}
++){
++    var text by remember { mutableStateOf("") }
++    val ingredientValidator: (String) -> String? = { input ->
++        if (input.isBlank()) {
++            "Steps cannot be empty"
++        } else {
++            null
++        }
++    }
++    Row(
++        modifier = Modifier
++            .fillMaxWidth()
++            .padding(16.dp),
++        horizontalArrangement = Arrangement.Center
++    ) {
++        Button(
++            onClick = {
++                if (ingredientValidator(text) == null) {
++                    onAddStep(text)
++                    text = ""
++                }
++            },
++            modifier = Modifier.padding(end = 8.dp).size(64.dp),
++            shape = CircleShape,
++            colors = ButtonDefaults.buttonColors(
++                containerColor = AddRecipeContainerTitleColor
++            )
++        ) {
++            Icon(
++                imageVector = Icons.Filled.Add,
++                contentDescription = "Add",
++                tint = Color.White,
++            )
++        }
++        ValidatedOutlinedTextField(
++            onValueChange = {
++                text = it
++            },
++            validator = ingredientValidator,
++            placeHolderText = "Add a new Step...",
++            modifier = Modifier.padding(0.dp)
++        )
++
++    }
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/foodify/presentation/components/IndeterminateCircularIndicator.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/components/IndeterminateCircularIndicator.kt b/app/src/main/java/com/example/foodify/presentation/components/IndeterminateCircularIndicator.kt
+new file mode 100644
+--- /dev/null	(date 1756061945372)
++++ b/app/src/main/java/com/example/foodify/presentation/components/IndeterminateCircularIndicator.kt	(date 1756061945372)
+@@ -0,0 +1,21 @@
++package com.example.foodify.presentation.components
++
++import androidx.compose.foundation.layout.fillMaxWidth
++import androidx.compose.foundation.layout.padding
++import androidx.compose.foundation.layout.size
++import androidx.compose.foundation.layout.width
++import androidx.compose.material3.CircularProgressIndicator
++import androidx.compose.runtime.Composable
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.unit.dp
++import com.example.foodify.presentation.theme.MainColor
++
++@Composable
++fun IndeterminateCircularIndicator() {
++    CircularProgressIndicator(
++        modifier = Modifier.size(56.dp).fillMaxWidth(),
++        color = MainColor,
++        trackColor = Color.DarkGray,
++    )
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/SelectorChip.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/SelectorChip.kt b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/SelectorChip.kt
+new file mode 100644
+--- /dev/null	(date 1756042822032)
++++ b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/SelectorChip.kt	(date 1756042822032)
+@@ -0,0 +1,46 @@
++package com.example.foodify.presentation.screens.add_recipe.components
++
++import androidx.compose.foundation.clickable
++import androidx.compose.foundation.layout.padding
++import androidx.compose.foundation.shape.RoundedCornerShape
++import androidx.compose.material3.Surface
++import androidx.compose.material3.Text
++import androidx.compose.runtime.Composable
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.text.font.FontWeight
++import androidx.compose.ui.unit.dp
++import androidx.compose.ui.unit.sp
++
++
++@Composable
++fun SelectorChip(
++    text: String,
++    isSelected: Boolean,
++    onClick: () -> Unit
++) {
++    val backgroundColor = when {
++        isSelected -> Color.Yellow
++        else -> Color(0xFF6C7B7F).copy(alpha = 0.3f)
++    }
++
++    val textColor = when {
++        isSelected -> Color.Black
++        else -> Color.White.copy(alpha = 0.7f)
++    }
++
++    Surface(
++        modifier = Modifier
++            .clickable { onClick() },
++        shape = RoundedCornerShape(20.dp),
++        color = backgroundColor
++    ) {
++        Text(
++            text = text,
++            color = textColor,
++            fontSize = 14.sp,
++            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
++            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
++        )
++    }
++}
+Index: app/src/main/java/com/example/foodify/presentation/screens/add_recipe/sub_screens/AddRecipeSubScreen1.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/sub_screens/AddRecipeSubScreen1.kt b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/sub_screens/AddRecipeSubScreen1.kt
+new file mode 100644
+--- /dev/null	(date 1756061488267)
++++ b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/sub_screens/AddRecipeSubScreen1.kt	(date 1756061488267)
+@@ -0,0 +1,112 @@
++package com.example.foodify.presentation.screens.add_recipe.sub_screens
++
++import AddIngredientField
++import AddRecipeTime
++import androidx.compose.foundation.layout.Arrangement
++import androidx.compose.foundation.layout.Column
++import androidx.compose.foundation.layout.Spacer
++import androidx.compose.foundation.layout.fillMaxSize
++import androidx.compose.foundation.layout.fillMaxWidth
++import androidx.compose.foundation.layout.padding
++import androidx.compose.foundation.rememberScrollState
++import androidx.compose.foundation.verticalScroll
++import androidx.compose.material3.Button
++import androidx.compose.material3.ButtonDefaults
++import androidx.compose.material3.Text
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.compose.runtime.mutableIntStateOf
++import androidx.compose.runtime.remember
++import androidx.compose.runtime.setValue
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.unit.dp
++import com.example.foodify.presentation.components.IndeterminateCircularIndicator
++import com.example.foodify.presentation.screens.add_recipe.components.AddRecipeCounter
++import com.example.foodify.presentation.screens.add_recipe.components.AddRecipeSelectorWithChip
++import com.example.foodify.presentation.screens.add_recipe.components.AddRecipeSelectorWithChipMultiple
++import com.example.foodify.presentation.screens.add_recipe.components.AddRecipeSelectorWithTF
++import com.example.foodify.presentation.viewmodels.AddRecipeViewModel
++import com.example.foodify.utils.difficultyList
++import com.example.foodify.utils.dishTypeList
++import com.example.foodify.utils.suggestedDietaryTargetList
++
++@Composable
++fun AddRecipeSubScreen1(viewModel: AddRecipeViewModel) {
++    var people by remember { mutableIntStateOf(1) }
++    val scrollState = rememberScrollState()
++    Column(
++        Modifier
++            .fillMaxSize()
++            .verticalScroll(scrollState)
++    ) {
++        AddRecipeSelectorWithTF(
++            "Name",
++            {
++                viewModel.state.name = it
++            },
++            placeHolderText = "Name your recipe",
++            validator = { return@AddRecipeSelectorWithTF viewModel.validateName(it) })
++        AddRecipeSelectorWithTF(
++            "Image URL",
++            {
++                viewModel.state.imageURL = it
++            },
++            placeHolderText = "ImageURL",
++            validator = { return@AddRecipeSelectorWithTF viewModel.validateImageUrl(it) })
++        AddRecipeCounter(people, onDecrement = {
++            if (people > 1) {
++                people--
++                viewModel.state.number = people
++            }
++        }, onIncrement = {
++            if (people < 10) {
++                people++
++                viewModel.state.number = people
++            }
++        })
++        AddRecipeTime(
++            onHourChange = {
++                viewModel.state.cookTimeHours = if (it.isBlank()) 0 else it.toInt()
++            },
++            onMinuteChange = {
++                viewModel.state.cookTimeMinutes = if (it.isBlank()) 0 else it.toInt()
++            },
++            hourValidator = {
++                return@AddRecipeTime viewModel.validateCookTimeHour(if (it.isBlank()) 0 else it.toInt())
++            },
++            minuteValidator = {
++                return@AddRecipeTime viewModel.validateCookTimeMinutes(if (it.isBlank()) 0 else it.toInt())
++
++            }
++        )
++        AddRecipeSelectorWithChip(
++            list = difficultyList,
++            title = "Difficulty",
++            onItemSelected = { index ->
++                viewModel.state.difficulty = difficultyList[index]
++            }
++        )
++        AddRecipeSelectorWithChipMultiple(viewModel.state.dishType, "Dish Type", dishTypeList)
++        AddRecipeSelectorWithChipMultiple(
++            viewModel.state.suggestedDietaryTarget, "Suggested Dietary Target",
++            suggestedDietaryTargetList
++        )
++        Spacer(modifier = Modifier.weight(1f))
++        Button(
++            onClick = { viewModel.validateScreen() },
++            modifier = Modifier
++                .fillMaxWidth()
++                .padding(16.dp),
++            colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
++        ) {
++            Text("Next")
++        }
++        if(viewModel.state.errorMessage.isNotBlank())Text(
++            viewModel.state.errorMessage,
++            color = Color.Red,
++            modifier = Modifier.padding(bottom = 36.dp, start = 36.dp, end = 36.dp)
++        )
++//        if (viewModel.state.isLoading) IndeterminateCircularIndicator()
++    }
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/SelectorCard.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/SelectorCard.kt b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/SelectorCard.kt
+new file mode 100644
+--- /dev/null	(date 1756059847399)
++++ b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/SelectorCard.kt	(date 1756059847399)
+@@ -0,0 +1,59 @@
++package com.example.foodify.presentation.screens.add_recipe.components
++
++import androidx.compose.foundation.background
++import androidx.compose.foundation.layout.Arrangement
++import androidx.compose.foundation.layout.Box
++import androidx.compose.foundation.layout.Column
++import androidx.compose.foundation.layout.fillMaxWidth
++import androidx.compose.foundation.layout.padding
++import androidx.compose.foundation.shape.RoundedCornerShape
++import androidx.compose.material3.Card
++import androidx.compose.material3.CardDefaults
++import androidx.compose.material3.Text
++import androidx.compose.runtime.Composable
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.text.font.FontWeight
++import androidx.compose.ui.unit.dp
++import androidx.compose.ui.unit.sp
++import com.example.foodify.presentation.theme.AddRecipeContainerTitleColor
++import com.example.foodify.presentation.theme.MainColor
++
++@Composable
++fun SelectorCard(color: Color = MainColor,content:@Composable ()-> Unit,){
++    Card(
++        modifier = Modifier
++            .fillMaxWidth(),
++        colors = CardDefaults.cardColors(
++            containerColor = color
++        ),
++        shape = RoundedCornerShape(16.dp)
++    ) {
++        Column(
++            modifier = Modifier.padding(24.dp),
++            content = { content() }
++        )
++    }
++}
++@Composable
++fun SelectorCardLabel(label:String){
++    Box(
++        modifier = Modifier
++            .background(Color.White, RoundedCornerShape(bottomEnd = 8.dp))
++            .padding(
++                5.dp,
++            )
++            .background(
++                AddRecipeContainerTitleColor,
++                RoundedCornerShape(8.dp)
++            )
++            .padding(horizontal = 12.dp, vertical = 4.dp)
++    ) {
++        Text(
++            text = label,
++            color = Color.White,
++            fontSize = 14.sp,
++            fontWeight = FontWeight.Medium
++        )
++    }
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeSelector.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeSelector.kt b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeSelector.kt
+new file mode 100644
+--- /dev/null	(date 1756059867567)
++++ b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeSelector.kt	(date 1756059867567)
+@@ -0,0 +1,113 @@
++package com.example.foodify.presentation.screens.add_recipe.components
++
++import androidx.compose.foundation.layout.Arrangement
++import androidx.compose.foundation.layout.Box
++import androidx.compose.foundation.layout.ExperimentalLayoutApi
++import androidx.compose.foundation.layout.FlowRow
++import androidx.compose.foundation.layout.fillMaxWidth
++import androidx.compose.foundation.layout.padding
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.compose.runtime.mutableIntStateOf
++import androidx.compose.runtime.mutableStateListOf
++import androidx.compose.runtime.remember
++import androidx.compose.runtime.setValue
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.unit.dp
++import com.example.foodify.presentation.components.ValidatedOutlinedTextField
++
++
++@OptIn(ExperimentalLayoutApi::class)
++@Composable
++fun AddRecipeSelectorWithChip(
++    onItemSelected: (Int) -> Unit = {},
++    title: String,
++    list: List<String>,
++) {
++    var selectedIndex by remember { mutableIntStateOf(0) }
++    Box(
++        Modifier
++            .fillMaxWidth()
++            .padding(16.dp)
++    ) {
++        SelectorCard {
++            FlowRow(
++                Modifier.padding(top = 40.dp),
++                horizontalArrangement = Arrangement.spacedBy(12.dp),
++                verticalArrangement = Arrangement.spacedBy(8.dp)
++            ) {
++                list.forEachIndexed { index, item ->
++                    SelectorChip(
++                        text = item,
++                        isSelected = index == selectedIndex,
++                        onClick = {
++                            selectedIndex = index
++                            onItemSelected(index)
++                        }
++                    )
++                }
++            }
++        }
++        SelectorCardLabel(title)
++    }
++}
++
++@OptIn(ExperimentalLayoutApi::class)
++@Composable
++fun AddRecipeSelectorWithChipMultiple(
++    viewModelList: MutableList<String>,
++    title: String,
++    list: List<String>,
++) {
++    val selectedIndices = remember { mutableStateListOf<Int>() }
++    Box(
++        Modifier
++            .fillMaxWidth()
++            .padding(16.dp)
++    ) {
++        SelectorCard {
++            FlowRow(
++                Modifier.padding(top = 40.dp),
++                horizontalArrangement = Arrangement.spacedBy(12.dp),
++                verticalArrangement = Arrangement.spacedBy(8.dp)
++            ) {
++                list.forEachIndexed { index, item ->
++                    SelectorChip(
++                        text = item,
++                        isSelected = index in selectedIndices,
++                        onClick = {
++                            if (index in selectedIndices) {
++                                selectedIndices.remove(index)
++                                viewModelList.remove(list[index])
++                            } else {
++                                selectedIndices.add((index))
++                                viewModelList.add(list[index])
++
++                            }
++                        }
++                    )
++                }
++            }
++        }
++        SelectorCardLabel(title)
++    }
++}
++
++@Composable
++fun AddRecipeSelectorWithTF(
++    title: String,
++    onValueChange: (String) -> Unit,
++    placeHolderText: String,
++    validator: (String) -> String?,
++) {
++    Box(
++        Modifier
++            .fillMaxWidth()
++            .padding(16.dp)
++    ) {
++        SelectorCard {
++            ValidatedOutlinedTextField(onValueChange, validator, placeHolderText, modifier = Modifier.padding(top=36.dp).fillMaxWidth())
++        }
++        SelectorCardLabel(title)
++    }
++}
+Index: app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeAppBar.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeAppBar.kt b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeAppBar.kt
+new file mode 100644
+--- /dev/null	(date 1756054166963)
++++ b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeAppBar.kt	(date 1756054166963)
+@@ -0,0 +1,65 @@
++package com.example.foodify.presentation.screens.add_recipe.components
++
++import androidx.compose.foundation.layout.fillMaxWidth
++import androidx.compose.foundation.shape.RoundedCornerShape
++import androidx.compose.material.icons.Icons
++import androidx.compose.material.icons.automirrored.filled.ArrowBack
++import androidx.compose.material3.Button
++import androidx.compose.material3.ButtonDefaults
++import androidx.compose.material3.ExperimentalMaterial3Api
++import androidx.compose.material3.Icon
++import androidx.compose.material3.IconButton
++import androidx.compose.material3.Text
++import androidx.compose.material3.TopAppBar
++import androidx.compose.material3.TopAppBarDefaults
++import androidx.compose.runtime.Composable
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.draw.clip
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.text.style.TextAlign
++import androidx.compose.ui.unit.dp
++import androidx.compose.ui.unit.sp
++import com.example.foodify.presentation.theme.MainColor
++import com.example.foodify.presentation.viewmodels.AddRecipeViewModel
++import com.example.foodify.utils.aqradaFontFamily
++
++@OptIn(ExperimentalMaterial3Api::class)
++@Composable
++fun AddRecipeAppBar(viewModel: AddRecipeViewModel) {
++    TopAppBar(
++        modifier = Modifier.clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)),
++        colors = TopAppBarDefaults.topAppBarColors(containerColor = MainColor),
++        title = {
++            Text(
++                "New Recipe",
++                fontFamily = aqradaFontFamily,
++                textAlign = TextAlign.Center,
++                fontSize = 14.sp,
++                modifier = Modifier.fillMaxWidth(),
++                color = Color.White
++            )
++        },
++//        navigationIcon = {
++//            IconButton(onClick = { /* Handle navigation */ }) {
++//                Icon(
++//                    Icons.AutoMirrored.Filled.ArrowBack,
++//                    contentDescription = "Menu",
++//                    tint = Color.White
++//                )
++//            }
++//        },
++        actions = {
++            Button(
++                onClick = { viewModel.clearAll() },
++                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
++            ) {
++                Text(
++                    "Clear all",
++                    textAlign = TextAlign.Center,
++                    fontSize = 14.sp,
++                )
++            }
++        }
++    )
++
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/foodify/utils/Constants.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/utils/Constants.kt b/app/src/main/java/com/example/foodify/utils/Constants.kt
+new file mode 100644
+--- /dev/null	(date 1756040556528)
++++ b/app/src/main/java/com/example/foodify/utils/Constants.kt	(date 1756040556528)
+@@ -0,0 +1,7 @@
++package com.example.foodify.utils
++
++val difficultyList: List<String> = listOf("Easy", "Medium", "Hard")
++val dishTypeList =
++    listOf("Breakfast", "Lunch", "Snack", "Brunch", "Dessert", "Dinner", "Appetizers")
++val suggestedDietaryTargetList =
++    listOf("Vegetarian", "High Fat", "Low Fat", "Sugar Free", "Lactose Free", "Gluten Free")
+Index: app/src/main/java/com/example/foodify/presentation/screens/add_recipe/AddRecipeScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/AddRecipeScreen.kt b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/AddRecipeScreen.kt
+new file mode 100644
+--- /dev/null	(date 1756061488263)
++++ b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/AddRecipeScreen.kt	(date 1756061488263)
+@@ -0,0 +1,60 @@
++package com.example.foodify.presentation.screens.add_recipe
++
++import androidx.compose.foundation.clickable
++import androidx.compose.foundation.interaction.MutableInteractionSource
++import androidx.compose.foundation.layout.Arrangement
++import androidx.compose.foundation.layout.Column
++import androidx.compose.foundation.layout.fillMaxSize
++import androidx.compose.foundation.layout.padding
++import androidx.compose.material3.Scaffold
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.remember
++import androidx.compose.ui.Alignment
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.platform.LocalFocusManager
++import androidx.compose.ui.unit.dp
++import androidx.hilt.navigation.compose.hiltViewModel
++import androidx.navigation.NavHostController
++import com.example.foodify.presentation.screens.add_recipe.components.AddRecipeAppBar
++import com.example.foodify.presentation.screens.add_recipe.components.AddRecipeStepper
++import com.example.foodify.presentation.screens.add_recipe.sub_screens.AddRecipeSubScreen1
++import com.example.foodify.presentation.screens.add_recipe.sub_screens.AddRecipeSubScreen2
++import com.example.foodify.presentation.screens.add_recipe.sub_screens.AddRecipeSubScreen3
++import com.example.foodify.presentation.viewmodels.AddRecipeViewModel
++
++@Composable
++fun AddRecipeScreen(navController: NavHostController) {
++    val viewModel: AddRecipeViewModel = hiltViewModel()
++    val state = viewModel.state
++    val focusManager = LocalFocusManager.current
++
++    Scaffold(Modifier.fillMaxSize(), topBar = { AddRecipeAppBar(viewModel) }) { innerPadding ->
++        Column(
++            Modifier
++                .fillMaxSize()
++                .padding(innerPadding)
++                .clickable(
++                    indication = null,
++                    interactionSource = remember { MutableInteractionSource() }
++
++                ) {
++                    focusManager.clearFocus()
++                },
++            verticalArrangement = Arrangement.spacedBy(12.dp),
++            horizontalAlignment = Alignment.CenterHorizontally
++        ) {
++            AddRecipeStepper(
++                steps = listOf("Recipe Information", "Ingredients", "Steps"),
++                currentStep = state.screenNum + 1
++            )
++            when (state.screenNum) {
++                0 -> AddRecipeSubScreen1(viewModel)
++                1 -> AddRecipeSubScreen2(viewModel)
++                2 -> AddRecipeSubScreen3(viewModel)
++            }
++        }
++    }
++}
++
++
++
+Index: .idea/dictionaries/project.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><component name=\"ProjectDictionaryState\">\r\n  <dictionary name=\"project\">\r\n    <words>\r\n      <w>aqrada</w>\r\n      <w>foodify</w>\r\n    </words>\r\n  </dictionary>\r\n</component>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/dictionaries/project.xml b/.idea/dictionaries/project.xml
+--- a/.idea/dictionaries/project.xml	(revision b81e38a48e6091bfaecc2e943e652570229d468d)
++++ b/.idea/dictionaries/project.xml	(date 1756059611452)
+@@ -3,6 +3,7 @@
+     <words>
+       <w>aqrada</w>
+       <w>foodify</w>
++      <w>indicies</w>
+     </words>
+   </dictionary>
+ </component>
+\ No newline at end of file
+Index: app/src/main/java/com/example/foodify/presentation/navigation/NavigationStack.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.foodify.presentation.navigation\r\n\r\nimport androidx.compose.runtime.Composable\r\nimport androidx.navigation.compose.NavHost\r\nimport androidx.navigation.compose.composable\r\nimport androidx.navigation.compose.rememberNavController\r\nimport com.example.foodify.presentation.screens.home.HomeScreen\r\nimport com.example.foodify.presentation.screens.onboarding.OnBoardingScreen\r\nimport com.example.foodify.presentation.screens.splash.SplashScreen\r\n\r\n@Composable\r\nfun NavigationStack() {\r\n    val navController = rememberNavController()\r\n    NavHost(\r\n        navController = navController, startDestination = Screen.Splash.route\r\n    ) {\r\n        composable(Screen.Splash.route) {\r\n            SplashScreen(navController)\r\n        }\r\n        composable(Screen.OnBoarding.route) {\r\n            OnBoardingScreen(navController)\r\n        }\r\n        composable(Screen.Home.route) {\r\n            HomeScreen(navController)\r\n        }\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/navigation/NavigationStack.kt b/app/src/main/java/com/example/foodify/presentation/navigation/NavigationStack.kt
+--- a/app/src/main/java/com/example/foodify/presentation/navigation/NavigationStack.kt	(revision b81e38a48e6091bfaecc2e943e652570229d468d)
++++ b/app/src/main/java/com/example/foodify/presentation/navigation/NavigationStack.kt	(date 1756050761843)
+@@ -4,6 +4,7 @@
+ import androidx.navigation.compose.NavHost
+ import androidx.navigation.compose.composable
+ import androidx.navigation.compose.rememberNavController
++import com.example.foodify.presentation.screens.add_recipe.AddRecipeScreen
+ import com.example.foodify.presentation.screens.home.HomeScreen
+ import com.example.foodify.presentation.screens.onboarding.OnBoardingScreen
+ import com.example.foodify.presentation.screens.splash.SplashScreen
+@@ -12,7 +13,7 @@
+ fun NavigationStack() {
+     val navController = rememberNavController()
+     NavHost(
+-        navController = navController, startDestination = Screen.Splash.route
++        navController = navController, startDestination = Screen.AddRecipe.route
+     ) {
+         composable(Screen.Splash.route) {
+             SplashScreen(navController)
+@@ -23,5 +24,8 @@
+         composable(Screen.Home.route) {
+             HomeScreen(navController)
+         }
++        composable(Screen.AddRecipe.route) {
++            AddRecipeScreen(navController)
++        }
+     }
+ }
+\ No newline at end of file
+Index: app/build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>plugins {\r\n    alias(libs.plugins.android.application)\r\n    alias(libs.plugins.kotlin.android)\r\n    alias(libs.plugins.kotlin.compose)\r\n    id(\"com.google.dagger.hilt.android\")\r\n    id(\"com.google.devtools.ksp\")\r\n}\r\n\r\n\r\nandroid {\r\n    namespace = \"com.example.foodify\"\r\n    compileSdk = 36\r\n\r\n    defaultConfig {\r\n        applicationId = \"com.example.foodify\"\r\n        minSdk = 24\r\n        targetSdk = 36\r\n        versionCode = 1\r\n        versionName = \"1.0\"\r\n\r\n        testInstrumentationRunner = \"androidx.test.runner.AndroidJUnitRunner\"\r\n    }\r\n\r\n    buildTypes {\r\n        release {\r\n            isMinifyEnabled = false\r\n            proguardFiles(\r\n                getDefaultProguardFile(\"proguard-android-optimize.txt\"),\r\n                \"proguard-rules.pro\"\r\n            )\r\n        }\r\n    }\r\n    compileOptions {\r\n        sourceCompatibility = JavaVersion.VERSION_11\r\n        targetCompatibility = JavaVersion.VERSION_11\r\n    }\r\n    kotlinOptions {\r\n        jvmTarget = \"11\"\r\n    }\r\n    buildFeatures {\r\n        compose = true\r\n    }\r\n}\r\n\r\ndependencies {\r\n\r\n    implementation(libs.androidx.core.ktx)\r\n    implementation(libs.androidx.lifecycle.runtime.ktx)\r\n    implementation(libs.androidx.activity.compose)\r\n    implementation(platform(libs.androidx.compose.bom))\r\n    implementation(libs.androidx.ui)\r\n    implementation(libs.androidx.ui.graphics)\r\n    implementation(libs.androidx.ui.tooling.preview)\r\n    implementation(libs.androidx.material3)\r\n    testImplementation(libs.junit)\r\n    androidTestImplementation(libs.androidx.junit)\r\n    androidTestImplementation(libs.androidx.espresso.core)\r\n    androidTestImplementation(platform(libs.androidx.compose.bom))\r\n    androidTestImplementation(libs.androidx.ui.test.junit4)\r\n    debugImplementation(libs.androidx.ui.tooling)\r\n    debugImplementation(libs.androidx.ui.test.manifest)\r\n    // ViewModel\r\n    implementation(\"androidx.lifecycle:lifecycle-viewmodel-compose:2.9.2\")\r\n    //Navigation\r\n    implementation(\"androidx.navigation:navigation-compose:2.9.2\")\r\n    //Glide\r\n    implementation(\"com.github.bumptech.glide:glide:4.15.1\")\r\n    // Room\r\n    implementation(\"androidx.room:room-runtime:2.7.2\")\r\n    ksp(\"androidx.room:room-compiler:2.7.2\")\r\n    implementation(\"androidx.room:room-ktx:2.7.2\")\r\n    // Datastore\r\n    implementation(\"androidx.datastore:datastore-preferences:1.1.7\")\r\n    // Dagger Hilt\r\n    implementation(\"com.google.dagger:hilt-android:2.57\")\r\n    ksp(\"com.google.dagger:hilt-android-compiler:2.57\")\r\n    implementation(\"androidx.hilt:hilt-navigation-compose:1.2.0\")\r\n    // Splash screen\r\n    implementation(libs.core.splashscreen)\r\n    //Gson for type conversion list of Recipe inside Collection\r\n    implementation(\"com.google.code.gson:gson:2.10.1\")\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/build.gradle.kts b/app/build.gradle.kts
+--- a/app/build.gradle.kts	(revision b81e38a48e6091bfaecc2e943e652570229d468d)
++++ b/app/build.gradle.kts	(date 1756038317849)
+@@ -65,6 +65,7 @@
+     implementation("androidx.navigation:navigation-compose:2.9.2")
+     //Glide
+     implementation("com.github.bumptech.glide:glide:4.15.1")
++    implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
+     // Room
+     implementation("androidx.room:room-runtime:2.7.2")
+     ksp("androidx.room:room-compiler:2.7.2")
+Index: app/src/main/java/com/example/foodify/presentation/navigation/Screen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.foodify.presentation.navigation\r\n\r\nsealed class Screen(val route:String) {\r\n    object Home: Screen(\"home_screen\")\r\n    object Splash:Screen(\"splash_screen\")\r\n    object OnBoarding: Screen(\"onboarding_screen\")\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/navigation/Screen.kt b/app/src/main/java/com/example/foodify/presentation/navigation/Screen.kt
+--- a/app/src/main/java/com/example/foodify/presentation/navigation/Screen.kt	(revision b81e38a48e6091bfaecc2e943e652570229d468d)
++++ b/app/src/main/java/com/example/foodify/presentation/navigation/Screen.kt	(date 1756050672689)
+@@ -4,4 +4,5 @@
+     object Home: Screen("home_screen")
+     object Splash:Screen("splash_screen")
+     object OnBoarding: Screen("onboarding_screen")
++    object AddRecipe: Screen("add_recipe_screen")
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/example/foodify/presentation/screens/add_recipe/sub_screens/AddRecipeSubScreen2.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/sub_screens/AddRecipeSubScreen2.kt b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/sub_screens/AddRecipeSubScreen2.kt
+new file mode 100644
+--- /dev/null	(date 1756061488258)
++++ b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/sub_screens/AddRecipeSubScreen2.kt	(date 1756061488258)
+@@ -0,0 +1,68 @@
++package com.example.foodify.presentation.screens.add_recipe.sub_screens
++
++import AddIngredientField
++import androidx.compose.foundation.layout.Arrangement
++import androidx.compose.foundation.layout.Box
++import androidx.compose.foundation.layout.Column
++import androidx.compose.foundation.layout.Spacer
++import androidx.compose.foundation.layout.fillMaxSize
++import androidx.compose.foundation.layout.fillMaxWidth
++import androidx.compose.foundation.layout.padding
++import androidx.compose.foundation.lazy.LazyColumn
++import androidx.compose.foundation.lazy.itemsIndexed
++import androidx.compose.material3.Button
++import androidx.compose.material3.ButtonDefaults
++import androidx.compose.material3.Text
++import androidx.compose.runtime.Composable
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.unit.dp
++import com.example.foodify.presentation.components.IndeterminateCircularIndicator
++import com.example.foodify.presentation.screens.add_recipe.components.SelectorCard
++import com.example.foodify.presentation.screens.add_recipe.components.SelectorCardLabel
++import com.example.foodify.presentation.viewmodels.AddRecipeViewModel
++
++@Composable
++fun AddRecipeSubScreen2(viewModel: AddRecipeViewModel) {
++    Column(Modifier.fillMaxSize()) {
++        LazyColumn(
++            modifier = Modifier.padding(16.dp),
++        ) {
++            itemsIndexed(viewModel.state.ingredients) { index, ingredient ->
++                Box(
++                    Modifier
++                        .fillMaxWidth()
++                ) {
++                    SelectorCard(color = Color.Transparent) {
++                        Text(
++                            ingredient,
++                            color = Color.Black,
++                            modifier = Modifier.padding(start = 24.dp)
++                        )
++                    }
++                    SelectorCardLabel((index + 1).toString())
++                }
++            }
++        }
++        AddIngredientField {
++            viewModel.addIngredients(it)
++        }
++        Spacer(modifier = Modifier.weight(1f))
++        Button(
++            onClick = { viewModel.validateScreen() },
++            modifier = Modifier
++                .fillMaxWidth()
++                .padding(16.dp),
++            colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
++        ) {
++            Text("Next")
++        }
++        if(viewModel.state.errorMessage.isNotBlank())Text(
++            viewModel.state.errorMessage,
++            color = Color.Red,
++            modifier = Modifier.padding(bottom = 36.dp, start = 36.dp, end = 36.dp)
++        )
++//        if (viewModel.state.isLoading) IndeterminateCircularIndicator()
++    }
++
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/foodify/presentation/screens/add_recipe/sub_screens/AddRecipeSubScreen3.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/sub_screens/AddRecipeSubScreen3.kt b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/sub_screens/AddRecipeSubScreen3.kt
+new file mode 100644
+--- /dev/null	(date 1756061383663)
++++ b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/sub_screens/AddRecipeSubScreen3.kt	(date 1756061383663)
+@@ -0,0 +1,67 @@
++package com.example.foodify.presentation.screens.add_recipe.sub_screens
++
++import AddIngredientField
++import androidx.compose.foundation.layout.Box
++import androidx.compose.foundation.layout.Column
++import androidx.compose.foundation.layout.Spacer
++import androidx.compose.foundation.layout.fillMaxSize
++import androidx.compose.foundation.layout.fillMaxWidth
++import androidx.compose.foundation.layout.padding
++import androidx.compose.foundation.lazy.LazyColumn
++import androidx.compose.foundation.lazy.itemsIndexed
++import androidx.compose.material3.Button
++import androidx.compose.material3.ButtonDefaults
++import androidx.compose.material3.Text
++import androidx.compose.runtime.Composable
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.unit.dp
++import com.example.foodify.presentation.components.IndeterminateCircularIndicator
++import com.example.foodify.presentation.screens.add_recipe.components.AddStepField
++import com.example.foodify.presentation.screens.add_recipe.components.SelectorCard
++import com.example.foodify.presentation.screens.add_recipe.components.SelectorCardLabel
++import com.example.foodify.presentation.viewmodels.AddRecipeViewModel
++
++@Composable
++fun AddRecipeSubScreen3(viewModel: AddRecipeViewModel) {
++    Column(Modifier.fillMaxSize()) {
++        LazyColumn(
++            modifier = Modifier.padding(16.dp),
++        ) {
++            itemsIndexed(viewModel.state.steps) { index, step ->
++                Box(
++                    Modifier
++                        .fillMaxWidth()
++                ) {
++                    SelectorCard(color = Color.Transparent) {
++                        Text(
++                            step,
++                            color = Color.Black,
++                            modifier = Modifier.padding(start = 24.dp)
++                        )
++                    }
++                    SelectorCardLabel((index + 1).toString())
++                }
++            }
++        }
++        AddStepField {
++            viewModel.addStep(it)
++        }
++        Spacer(modifier = Modifier.weight(1f))
++        Button(
++            onClick = { viewModel.validateScreen() },
++            modifier = Modifier
++                .fillMaxWidth()
++                .padding(16.dp),
++            colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
++        ) {
++            Text("Finish")
++        }
++        if(viewModel.state.errorMessage.isNotBlank())Text(
++            viewModel.state.errorMessage,
++            color = Color.Red,
++            modifier = Modifier.padding(bottom = 36.dp, start = 36.dp, end = 36.dp)
++        )
++        if (viewModel.state.isLoading) IndeterminateCircularIndicator()
++    }
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeCounter.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeCounter.kt b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeCounter.kt
+new file mode 100644
+--- /dev/null	(date 1756059847390)
++++ b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeCounter.kt	(date 1756059847390)
+@@ -0,0 +1,100 @@
++package com.example.foodify.presentation.screens.add_recipe.components
++
++import androidx.compose.foundation.background
++import androidx.compose.foundation.layout.Box
++import androidx.compose.foundation.layout.PaddingValues
++import androidx.compose.foundation.layout.Row
++import androidx.compose.foundation.layout.Spacer
++import androidx.compose.foundation.layout.fillMaxWidth
++import androidx.compose.foundation.layout.padding
++import androidx.compose.foundation.layout.size
++import androidx.compose.foundation.layout.width
++import androidx.compose.foundation.shape.CircleShape
++import androidx.compose.material3.Button
++import androidx.compose.material3.ButtonDefaults
++import androidx.compose.material3.Icon
++import androidx.compose.material3.Text
++import androidx.compose.runtime.Composable
++import androidx.compose.ui.Alignment
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.res.painterResource
++import androidx.compose.ui.text.font.FontWeight
++import androidx.compose.ui.unit.dp
++import androidx.compose.ui.unit.sp
++import com.example.foodify.R
++import com.example.foodify.presentation.theme.MainColor
++
++
++@Composable
++fun AddRecipeCounter(people: Int, onDecrement: () -> Unit, onIncrement: () -> Unit) {
++    Box(
++        Modifier
++            .fillMaxWidth()
++            .padding(16.dp)
++    ) {
++        SelectorCard {
++            Row(
++                modifier = Modifier
++                    .fillMaxWidth()
++                    .background(MainColor)
++                    .padding(24.dp),
++                verticalAlignment = Alignment.CenterVertically
++            ) {
++                Text(
++                    text = "Serving for",
++                    color = Color.White.copy(alpha = 0.8f),
++                    fontSize = 16.sp,
++                    fontWeight = FontWeight.Light,
++                    modifier = Modifier.weight(1f)
++                )
++
++                Spacer(modifier = Modifier.width(16.dp))
++
++                IncrementDecrementButton(
++                    iconId = R.drawable.ic_remove,
++                    onClick = onDecrement
++                )
++                Text(
++                    text = "$people",
++                    color = Color.White,
++                    fontSize = 24.sp,
++                    fontWeight = FontWeight.Medium,
++                    modifier = Modifier.padding(horizontal = 8.dp)
++                )
++
++                IncrementDecrementButton(
++                    iconId = R.drawable.ic_add,
++                    onClick = onIncrement
++                )
++                Text(
++                    text = "People",
++                    color = Color.White.copy(alpha = 0.8f),
++                    fontSize = 16.sp,
++                    fontWeight = FontWeight.Light,
++                    modifier = Modifier.padding(start = 16.dp)
++                )
++            }        }
++        SelectorCardLabel("Number")
++    }
++
++}
++
++@Composable
++fun IncrementDecrementButton(iconId: Int, onClick: () -> Unit) {
++    Button(
++        onClick = onClick,
++        modifier = Modifier.size(36.dp),
++        colors = ButtonDefaults.buttonColors(
++            containerColor = Color.White
++        ),
++        shape = CircleShape,
++        contentPadding = PaddingValues(0.dp)
++    ) {
++        Icon(
++            painter = painterResource(id = iconId),
++            contentDescription = null, // decorative icon
++            tint = MainColor
++        )
++    }
++}
+Index: app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeStepper.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeStepper.kt b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeStepper.kt
+new file mode 100644
+--- /dev/null	(date 1756045076989)
++++ b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeStepper.kt	(date 1756045076989)
+@@ -0,0 +1,71 @@
++package com.example.foodify.presentation.screens.add_recipe.components
++
++import androidx.compose.foundation.background
++import androidx.compose.foundation.layout.Arrangement
++import androidx.compose.foundation.layout.Box
++import androidx.compose.foundation.layout.Row
++import androidx.compose.foundation.layout.fillMaxWidth
++import androidx.compose.foundation.layout.height
++import androidx.compose.foundation.layout.padding
++import androidx.compose.foundation.layout.size
++import androidx.compose.foundation.layout.width
++import androidx.compose.foundation.shape.CircleShape
++import androidx.compose.foundation.shape.RoundedCornerShape
++import androidx.compose.material3.MaterialTheme
++import androidx.compose.material3.Text
++import androidx.compose.runtime.Composable
++import androidx.compose.ui.Alignment
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.unit.dp
++
++@Composable
++fun AddRecipeStepper(
++    steps: List<String>,
++    currentStep: Int
++) {
++    Row(
++        verticalAlignment = Alignment.CenterVertically,
++        horizontalArrangement = Arrangement.Center,
++        modifier = Modifier.fillMaxWidth().padding(16.dp)
++    ) {
++        steps.forEachIndexed { index, step ->
++            Box(
++                modifier = Modifier
++                    .size(32.dp)
++                    .background(
++                        Color.DarkGray,
++                        CircleShape
++                    ),
++                contentAlignment = Alignment.Center
++            ) {
++                Text(
++                    text = "${index + 1}",
++                    color = if (index < currentStep) Color.Yellow else Color.Gray,
++                    style = MaterialTheme.typography.bodyMedium
++                )
++            }
++            if (index + 1 == currentStep) {
++                Box(
++                    modifier = Modifier
++                        .background(Color.DarkGray, RoundedCornerShape(50))
++                        .padding(horizontal = 12.dp, vertical = 8.dp)
++                ) {
++                    Text(
++                        text = step,
++                        color = Color.Yellow
++                    )
++                }
++            }
++
++            if (index != steps.lastIndex) {
++                Box(
++                    modifier = Modifier
++                        .width(24.dp)
++                        .height(2.dp)
++                        .background(Color.DarkGray)
++                )
++            }
++        }
++    }
++}
+\ No newline at end of file
+Index: app/src/main/res/drawable/ic_remove.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/drawable/ic_remove.xml b/app/src/main/res/drawable/ic_remove.xml
+new file mode 100644
+--- /dev/null	(date 1756046338470)
++++ b/app/src/main/res/drawable/ic_remove.xml	(date 1756046338470)
+@@ -0,0 +1,5 @@
++<vector xmlns:android="http://schemas.android.com/apk/res/android" android:height="24dp" android:tint="#180038" android:viewportHeight="960" android:viewportWidth="960" android:width="24dp">
++      
++    <path android:fillColor="@android:color/white" android:pathData="M200,520L200,440L760,440L760,520L200,520Z"/>
++    
++</vector>
+Index: app/src/main/java/com/example/foodify/presentation/theme/Color.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.foodify.presentation.theme\r\n\r\nimport androidx.compose.ui.graphics.Color\r\n\r\nval Purple80 = Color(0xFFD0BCFF)\r\nval PurpleGrey80 = Color(0xFFCCC2DC)\r\nval Pink80 = Color(0xFFEFB8C8)\r\n\r\nval Purple40 = Color(0xFF6650a4)\r\nval PurpleGrey40 = Color(0xFF625b71)\r\nval Pink40 = Color(0xFF7D5260)\r\n\r\nval MainColor = Color(0xFF4058A0)\r\nval LoadingCircleColor = Color(0xFFDEE21B)\r\nval OnBoarding2Color = Color(0xFFFF6339)\r\nval OnBoarding3Color = Color(0xFFDEE21B)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/theme/Color.kt b/app/src/main/java/com/example/foodify/presentation/theme/Color.kt
+--- a/app/src/main/java/com/example/foodify/presentation/theme/Color.kt	(revision b81e38a48e6091bfaecc2e943e652570229d468d)
++++ b/app/src/main/java/com/example/foodify/presentation/theme/Color.kt	(date 1756052148500)
+@@ -13,4 +13,6 @@
+ val MainColor = Color(0xFF4058A0)
+ val LoadingCircleColor = Color(0xFFDEE21B)
+ val OnBoarding2Color = Color(0xFFFF6339)
+-val OnBoarding3Color = Color(0xFFDEE21B)
+\ No newline at end of file
++val OnBoarding3Color = Color(0xFFDEE21B)
++
++val AddRecipeContainerTitleColor = Color(0xFFFF6339)
+\ No newline at end of file
+Index: app/src/main/res/drawable/ic_add.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/drawable/ic_add.xml b/app/src/main/res/drawable/ic_add.xml
+new file mode 100644
+--- /dev/null	(date 1756046320285)
++++ b/app/src/main/res/drawable/ic_add.xml	(date 1756046320285)
+@@ -0,0 +1,5 @@
++<vector xmlns:android="http://schemas.android.com/apk/res/android" android:height="24dp" android:tint="#180038" android:viewportHeight="960" android:viewportWidth="960" android:width="24dp">
++      
++    <path android:fillColor="@android:color/white" android:pathData="M440,520L200,520L200,440L440,440L440,200L520,200L520,440L760,440L760,520L520,520L520,760L440,760L440,520Z"/>
++    
++</vector>
+Index: app/src/main/java/com/example/foodify/presentation/components/ValidatedOutlinedTextField.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/components/ValidatedOutlinedTextField.kt b/app/src/main/java/com/example/foodify/presentation/components/ValidatedOutlinedTextField.kt
+new file mode 100644
+--- /dev/null	(date 1756057636092)
++++ b/app/src/main/java/com/example/foodify/presentation/components/ValidatedOutlinedTextField.kt	(date 1756057636092)
+@@ -0,0 +1,64 @@
++package com.example.foodify.presentation.components
++
++import androidx.compose.foundation.text.KeyboardOptions
++import androidx.compose.material3.OutlinedTextField
++import androidx.compose.material3.OutlinedTextFieldDefaults
++import androidx.compose.material3.Text
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.compose.runtime.mutableStateOf
++import androidx.compose.runtime.remember
++import androidx.compose.runtime.setValue
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.text.font.FontWeight
++import androidx.compose.ui.text.input.KeyboardType
++import androidx.compose.ui.unit.sp
++
++@Composable
++fun ValidatedOutlinedTextField(
++    onValueChange: (String) -> Unit,
++    validator: (String) -> String?,
++    placeHolderText: String,
++    modifier: Modifier,
++    suffixText: String? = null,
++    keyboardType: KeyboardType= KeyboardType.Text
++) {
++    var text by remember { mutableStateOf("") }
++    var errorMessage by remember { mutableStateOf<String?>(null) }
++
++    OutlinedTextField(
++        value = text,
++        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = keyboardType),
++        onValueChange = {
++            text = it
++            errorMessage = validator(it)
++            onValueChange(it)
++        },
++        isError = errorMessage != null,
++        supportingText = {
++            if (errorMessage != null) {
++                Text(text = errorMessage!!, color = Color.Red)
++            }
++        },
++        modifier = modifier,
++        placeholder = { Text(placeHolderText, fontWeight = FontWeight.Light) },
++        suffix = {
++            if (suffixText != null)
++                Text(suffixText, fontSize = 10.sp) else null
++        },
++        colors = OutlinedTextFieldDefaults.colors(
++            focusedContainerColor = Color.White,
++            errorContainerColor = Color.White,
++            unfocusedContainerColor = Color.White,
++            errorBorderColor = Color.Red,
++            focusedBorderColor = Color.DarkGray,
++            unfocusedBorderColor = Color.Transparent,
++            errorTextColor = Color.Red,
++            unfocusedTextColor = Color.LightGray,
++            focusedTextColor = Color.DarkGray
++        ),
++        singleLine = true,
++
++    )
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddIngredientField.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddIngredientField.kt b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddIngredientField.kt
+new file mode 100644
+--- /dev/null	(date 1756056876273)
++++ b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddIngredientField.kt	(date 1756056876273)
+@@ -0,0 +1,71 @@
++import androidx.compose.foundation.layout.Arrangement
++import androidx.compose.foundation.layout.Row
++import androidx.compose.foundation.layout.fillMaxWidth
++import androidx.compose.foundation.layout.padding
++import androidx.compose.foundation.layout.size
++import androidx.compose.foundation.shape.CircleShape
++import androidx.compose.material.icons.Icons
++import androidx.compose.material.icons.filled.Add
++import androidx.compose.material3.Button
++import androidx.compose.material3.ButtonDefaults
++import androidx.compose.material3.Icon
++import androidx.compose.runtime.Composable
++import androidx.compose.runtime.getValue
++import androidx.compose.runtime.mutableStateOf
++import androidx.compose.runtime.remember
++import androidx.compose.runtime.setValue
++import androidx.compose.ui.Alignment
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.graphics.Color
++import androidx.compose.ui.unit.dp
++import com.example.foodify.presentation.components.ValidatedOutlinedTextField
++import com.example.foodify.presentation.theme.AddRecipeContainerTitleColor
++
++@Composable
++fun AddIngredientField(
++    onAddIngredient: (String) -> Unit = {}
++) {
++    var text by remember { mutableStateOf("") }
++    val ingredientValidator: (String) -> String? = { input ->
++        if (input.isBlank()) {
++            "Ingredient cannot be empty"
++        } else {
++            null
++        }
++    }
++    Row(
++        modifier = Modifier
++            .fillMaxWidth()
++            .padding(16.dp),
++        horizontalArrangement = Arrangement.Center
++    ) {
++        Button(
++            onClick = {
++                if (ingredientValidator(text) == null) {
++                    onAddIngredient(text)
++                    text = ""
++                }
++            },
++            modifier = Modifier.padding(end = 8.dp).size(64.dp),
++            shape = CircleShape,
++            colors = ButtonDefaults.buttonColors(
++                containerColor = AddRecipeContainerTitleColor
++            )
++        ) {
++            Icon(
++                imageVector = Icons.Filled.Add,
++                contentDescription = "Add",
++                tint = Color.White,
++            )
++        }
++        ValidatedOutlinedTextField(
++            onValueChange = {
++                text = it
++            },
++            validator = ingredientValidator,
++            placeHolderText = "Add a new ingredient...",
++            modifier = Modifier.padding(0.dp)
++        )
++
++    }
++}
+Index: app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeTime.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeTime.kt b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeTime.kt
+new file mode 100644
+--- /dev/null	(date 1756059847394)
++++ b/app/src/main/java/com/example/foodify/presentation/screens/add_recipe/components/AddRecipeTime.kt	(date 1756059847394)
+@@ -0,0 +1,54 @@
++import androidx.compose.foundation.layout.Arrangement
++import androidx.compose.foundation.layout.Box
++import androidx.compose.foundation.layout.Row
++import androidx.compose.foundation.layout.fillMaxWidth
++import androidx.compose.foundation.layout.padding
++import androidx.compose.runtime.Composable
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.text.input.KeyboardType
++import androidx.compose.ui.unit.dp
++import com.example.foodify.presentation.components.ValidatedOutlinedTextField
++import com.example.foodify.presentation.screens.add_recipe.components.SelectorCard
++import com.example.foodify.presentation.screens.add_recipe.components.SelectorCardLabel
++import javax.xml.validation.Validator
++
++@Composable
++fun AddRecipeTime(
++    onHourChange: (String) -> Unit,
++    onMinuteChange: (String) -> Unit,
++    hourValidator: (String) -> String?,
++    minuteValidator: (String) -> String?,
++) {
++    Box(
++        Modifier
++            .fillMaxWidth()
++            .padding(16.dp)
++    ) {
++        SelectorCard {
++            Row(
++                Modifier
++                    .fillMaxWidth()
++                    .padding(top = 36.dp),
++                horizontalArrangement = Arrangement.spacedBy(12.dp)
++            ) {
++                ValidatedOutlinedTextField(
++                    onHourChange,
++                    hourValidator,
++                    "",
++                    modifier = Modifier.weight(1f),
++                    keyboardType = KeyboardType.Number,
++                    suffixText = "h"
++                )
++                ValidatedOutlinedTextField(
++                    onMinuteChange,
++                    minuteValidator,
++                    "",
++                    modifier = Modifier.weight(1f),
++                    keyboardType = KeyboardType.Number,
++                    suffixText = "m"
++                )
++            }
++        }
++        SelectorCardLabel("Cook Time")
++    }
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/foodify/presentation/screens/details/DetailsScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/screens/details/DetailsScreen.kt b/app/src/main/java/com/example/foodify/presentation/screens/details/DetailsScreen.kt
+new file mode 100644
+--- /dev/null	(date 1756052010160)
++++ b/app/src/main/java/com/example/foodify/presentation/screens/details/DetailsScreen.kt	(date 1756052010160)
+@@ -0,0 +1,24 @@
++package com.example.foodify.presentation.screens.details
++
++import androidx.compose.foundation.layout.Column
++import androidx.compose.foundation.layout.fillMaxSize
++import androidx.compose.foundation.layout.padding
++import androidx.compose.material3.Scaffold
++import androidx.compose.runtime.Composable
++import androidx.compose.ui.Modifier
++import androidx.compose.ui.tooling.preview.Preview
++
++
++@Preview(showBackground = true)
++@Composable
++fun DetailsScreen() {
++    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
++        Column(
++            modifier = Modifier
++                .fillMaxSize()
++                .padding(innerPadding)
++        ) {
++
++        }
++    }
++}
+Index: app/src/main/java/com/example/foodify/presentation/viewmodels/AddRecipeViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/foodify/presentation/viewmodels/AddRecipeViewModel.kt b/app/src/main/java/com/example/foodify/presentation/viewmodels/AddRecipeViewModel.kt
+new file mode 100644
+--- /dev/null	(date 1756061573575)
++++ b/app/src/main/java/com/example/foodify/presentation/viewmodels/AddRecipeViewModel.kt	(date 1756061573575)
+@@ -0,0 +1,121 @@
++package com.example.foodify.presentation.viewmodels
++
++import android.util.Log
++import androidx.compose.runtime.getValue
++import androidx.compose.runtime.mutableStateOf
++import androidx.compose.runtime.setValue
++import androidx.lifecycle.ViewModel
++import com.example.foodify.domain.useCase.AddRecipeUseCase
++import dagger.hilt.android.lifecycle.HiltViewModel
++import javax.inject.Inject
++
++data class AddRecipeState(
++    var name: String = "",
++    var imageURL: String = "",
++    var number: Int = 1,
++    var cookTimeHours: Int = 0,
++    var cookTimeMinutes: Int = 0,
++    var difficulty: String = "Easy",
++    var dishType: MutableList<String> = mutableListOf(),
++    var suggestedDietaryTarget: MutableList<String> = mutableListOf(),
++    var ingredients: MutableList<String> = mutableListOf(),
++    var steps: MutableList<String> = mutableListOf(),
++    var screenNum: Int = 2,
++    var errorMessage: String = "",
++    var isLoading: Boolean=false,
++)
++
++@HiltViewModel
++class AddRecipeViewModel @Inject constructor(private val useCase: AddRecipeUseCase) : ViewModel() {
++    var state by mutableStateOf(AddRecipeState())
++        private set
++
++    fun validateName(name: String): String? {
++        if (name.isNotBlank()) {
++            return null
++        }
++        return "Name can't be empty"
++    }
++
++    fun validateImageUrl(imageURL: String): String? {
++        if (imageURL.isNotBlank()) {
++            return null
++        }
++        return "Url can't be empty"
++    }
++
++
++    fun validateCookTimeHour(cookTimeHours: Int): String? {
++        if (cookTimeHours >= 0) {
++            return null
++        }
++        return "Hours can't be negative value"
++    }
++
++    fun validateCookTimeMinutes(cookTimeMinutes: Int): String? {
++        if (cookTimeMinutes > 0 && state.cookTimeHours == 0 || cookTimeMinutes >= 0 && state.cookTimeHours > 0) {
++            return null
++        }
++        return "Minutes can't be zero for zero hours"
++    }
++
++    fun addIngredients(ingredient: String) {
++        if (ingredient.isNotBlank()) {
++            state = state.copy(
++                ingredients = state.ingredients.toMutableList().apply { add(ingredient) })
++        }
++    }
++
++    fun addStep(step: String) {
++        if (step.isNotBlank()) {
++            state = state.copy(
++                steps = state.steps.toMutableList().apply { add(step) })        }
++    }
++
++    fun clearAll() {
++        state = AddRecipeState()
++    }
++
++    fun validateScreen() {
++        when (state.screenNum) {
++            0 -> {
++                val errors = listOfNotNull(
++                    validateName(state.name),
++                    validateImageUrl(state.imageURL),
++                    validateCookTimeHour(state.cookTimeHours),
++                    validateCookTimeMinutes(state.cookTimeMinutes)
++                )
++                state = if (errors.isEmpty()) {
++                    state.copy(
++                        screenNum = state.screenNum + 1,
++                        errorMessage = ""
++                    )
++                } else {
++                    state.copy(
++                        errorMessage = errors.joinToString(separator = "\n")
++                    )
++                }
++            }
++
++            1 -> {
++                if (state.ingredients.isEmpty()) {
++                    state = state.copy(errorMessage = "Please add at least one ingredient")
++                } else {
++                    state = state.copy(
++                        screenNum = state.screenNum + 1,
++                        errorMessage = ""
++                    )
++                }
++            }
++
++            else -> {
++                if(state.steps.isEmpty()){
++                    state = state.copy(errorMessage = "Please add at least one step")
++                }else{
++                    state = state.copy(isLoading = true, errorMessage = "")
++//                    useCase.invoke()
++                }
++            }
++        }
++    }
++}
+\ No newline at end of file
